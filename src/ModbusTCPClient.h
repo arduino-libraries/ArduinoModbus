@@ -17,10 +17,24 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef _MODBUS_H_INCLUDED
-#define _MODBUS_H_INCLUDED
+#ifndef _MODBUS_TCP_CLIENT_H_INCLUDED
+#define _MODBUS_TCP_CLIENT_H_INCLUDED
 
-#include "ModbusRTUClient.h"
-#include "ModbusTCPClient.h"
+#include <Client.h>
+#include <IPAddress.h>
+
+#include "ModbusClient.h"
+
+class ModbusTCPClient : public ModbusClient {
+public:
+  ModbusTCPClient(Client& client);
+  virtual ~ModbusTCPClient();
+
+  int begin(IPAddress ip, uint16_t port = 502);
+  void end();
+
+private:
+  Client* _client;
+};
 
 #endif

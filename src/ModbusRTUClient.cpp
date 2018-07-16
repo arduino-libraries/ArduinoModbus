@@ -17,10 +17,28 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef _MODBUS_H_INCLUDED
-#define _MODBUS_H_INCLUDED
+#include <errno.h>
+
+extern "C" {
+#include "libmodbus/modbus.h"
+#include "libmodbus/modbus-rtu.h"
+}
 
 #include "ModbusRTUClient.h"
-#include "ModbusTCPClient.h"
 
-#endif
+ModbusRTUClientClass::ModbusRTUClientClass()
+{
+}
+
+ModbusRTUClientClass::~ModbusRTUClientClass()
+{
+}
+
+int ModbusRTUClientClass::begin(unsigned long baudRate, uint16_t config)
+{
+  modbus_t* mb = modbus_new_rtu(baudRate, config);
+
+  return ModbusClient::begin(mb);
+}
+
+ModbusRTUClientClass ModbusRTUClient;

@@ -17,10 +17,27 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef _MODBUS_H_INCLUDED
-#define _MODBUS_H_INCLUDED
+#include <errno.h>
 
-#include "ModbusRTUClient.h"
+extern "C" {
+#include "libmodbus/modbus.h"
+#include "libmodbus/modbus-tcp.h"
+}
+
 #include "ModbusTCPClient.h"
 
-#endif
+ModbusTCPClient::ModbusTCPClient(Client& client) :
+  _client(&client)
+{
+}
+
+ModbusTCPClient::~ModbusTCPClient()
+{
+}
+
+int ModbusTCPClient::begin(IPAddress ip, uint16_t port)
+{
+  modbus_t* mb = modbus_new_tcp(_client, ip, port);
+
+  return ModbusClient::begin(mb);
+}

@@ -17,4 +17,20 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#include "Modbus.h"
+#ifndef _MODBUS_RTU_CLIENT_H_INCLUDED
+#define _MODBUS_RTU_CLIENT_H_INCLUDED
+
+#include "ModbusClient.h"
+
+class ModbusRTUClientClass : public ModbusClient {
+public:
+  ModbusRTUClientClass();
+  virtual ~ModbusRTUClientClass();
+
+  int begin(unsigned long baudRate, uint16_t config = SERIAL_8N1);
+  void end();
+};
+
+extern ModbusRTUClientClass ModbusRTUClient;
+
+#endif

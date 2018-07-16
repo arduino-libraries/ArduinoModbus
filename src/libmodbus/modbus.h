@@ -111,7 +111,11 @@ MODBUS_BEGIN_DECLS
 #define MODBUS_MAX_ADU_LENGTH              260
 
 /* Random number to avoid errno conflicts */
+#if defined(ARDUINO) && defined(__AVR__)
+#define MODBUS_ENOBASE 11234
+#else
 #define MODBUS_ENOBASE 112345678
+#endif
 
 /* Protocol exceptions */
 enum {

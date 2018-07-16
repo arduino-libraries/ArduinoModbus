@@ -16,6 +16,11 @@
 
 #ifdef ARDUINO
 #include <RS485.h>
+
+#ifndef DEBUG
+#define printf(...) {}
+#define fprintf(...) {}
+#endif
 #endif
 
 #include "modbus-private.h"
@@ -31,8 +36,34 @@
 #include <linux/serial.h>
 #endif
 
+#if defined(ARDUINO) && defined(__AVR__)
+#include <avr/pgmspace.h>
+
+#undef EIO
+#define EIO 5
+
+#undef EINVAL
+#define EINVAL 22
+
+#undef ENOPROTOOPT
+#define ENOPROTOOPT 109
+
+#undef ECONNREFUSED
+#define ECONNREFUSED 111
+
+#undef ETIMEDOUT
+#define ETIMEDOUT 116
+
+#undef ENOTSUP
+#define ENOTSUP 134
+#endif
+
 /* Table of CRC values for high-order byte */
+#if defined(ARDUINO) && defined(__AVR__)
+static PROGMEM const uint8_t table_crc_hi[] = {
+#else
 static const uint8_t table_crc_hi[] = {
+#endif
     0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0,
     0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41,
     0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0,
@@ -62,7 +93,12 @@ static const uint8_t table_crc_hi[] = {
 };
 
 /* Table of CRC values for low-order byte */
+#if defined(ARDUINO) && defined(__AVR__)
+#include <avr/pgmspace.h>
+static PROGMEM const uint8_t table_crc_lo[] = {
+#else
 static const uint8_t table_crc_lo[] = {
+#endif
     0x00, 0xC0, 0xC1, 0x01, 0xC3, 0x03, 0x02, 0xC2, 0xC6, 0x06,
     0x07, 0xC7, 0x05, 0xC5, 0xC4, 0x04, 0xCC, 0x0C, 0x0D, 0xCD,
     0x0F, 0xCF, 0xCE, 0x0E, 0x0A, 0xCA, 0xCB, 0x0B, 0xC9, 0x09,
@@ -142,8 +178,13 @@ static uint16_t crc16(uint8_t *buffer, uint16_t buffer_length)
     /* pass through message buffer */
     while (buffer_length--) {
         i = crc_hi ^ *buffer++; /* calculate the CRC  */
+#if defined(ARDUINO) && defined(__AVR__)
+        crc_hi = crc_lo ^ pgm_read_byte_near(table_crc_hi + i);
+        crc_lo = pgm_read_byte_near(table_crc_lo + i);
+#else
         crc_hi = crc_lo ^ table_crc_hi[i];
         crc_lo = table_crc_lo[i];
+#endif
     }
 
     return (crc_hi << 8 | crc_lo);

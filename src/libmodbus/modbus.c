@@ -19,10 +19,35 @@
 #endif
 #ifdef ARDUINO
 #include <Arduino.h>
+
+#ifndef DEBUG
+#define printf(...) {}
+#define fprintf(...) {}
+#endif
 #endif
 
 #ifndef ARDUINO
 #include <config.h>
+#endif
+
+#if defined(ARDUINO) && defined(__AVR__)
+#undef EIO
+#define EIO 5
+
+#undef EINVAL
+#define EINVAL 22
+
+#undef ENOPROTOOPT
+#define ENOPROTOOPT 109
+
+#undef ECONNREFUSED
+#define ECONNREFUSED 111
+
+#undef ETIMEDOUT
+#define ETIMEDOUT 116
+
+#undef ENOTSUP
+#define ENOTSUP 134
 #endif
 
 #include "modbus.h"
@@ -45,6 +70,31 @@ typedef enum {
     _STEP_META,
     _STEP_DATA
 } _step_t;
+
+#if defined(ARDUINO) && defined(__AVR__)
+
+char *strerror(int errnum)
+{
+    switch (errnum) {
+        case 0:
+            return "Success";
+        case EIO:
+            return "I/O error";
+        case EINVAL:
+            return "Invalid argument";
+        case ENOPROTOOPT:
+            return "Protocol not available";
+        case ECONNREFUSED:
+            return "Connection refused";
+        case ETIMEDOUT:
+            return "Connection timed out";
+        case ENOTSUP:
+            return "Not supported";
+        default:
+            return "Unknown";
+    }
+}
+#endif
 
 const char *modbus_strerror(int errnum) {
     switch (errnum) {
@@ -807,7 +857,11 @@ int modbus_reply(modbus_t *ctx, const uint8_t *req,
         } else {
             int data = (req[offset + 3] << 8) + req[offset + 4];
 
+#if defined(ARDUINO) && defined(__AVR__)
+            if (data == (int)0xFF00 || data == 0x0) {
+#else
             if (data == 0xFF00 || data == 0x0) {
+#endif
                 mb_mapping->tab_bits[mapping_address] = data ? ON : OFF;
                 memcpy(rsp, req, req_length);
                 rsp_length = req_length;

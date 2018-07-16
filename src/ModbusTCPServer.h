@@ -17,13 +17,41 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef _ARDUINO_MODBUS_H_INCLUDED
-#define _ARDUINO_MODBUS_H_INCLUDED
+#ifndef _MODBUS_TCP_SERVER_H_INCLUDED
+#define _MODBUS_TCP_SERVER_H_INCLUDED
 
-#include "ModbusRTUClient.h"
-#include "ModbusRTUServer.h"
+#include <Client.h>
 
-#include "ModbusTCPClient.h"
-#include "ModbusTCPServer.h"
+#include "ModbusServer.h"
+
+class ModbusTCPServer : public ModbusServer {
+public:
+  ModbusTCPServer();
+  virtual ~ModbusTCPServer();
+
+  /**
+   * Start the Modbus TCP server with the specified parameters
+   *
+   * @param id (slave) id of the server, defaults to 0x00 (broadcast)
+   *
+   * Return 1 on success, 0 on failure
+   */
+  int begin(int id = 0x00);
+
+  /**
+   * Accept client connection
+   *
+   * @param client client to accept
+   */
+  void accept(Client& client);
+
+  /**
+   * Poll accepted client for requests
+   */
+  virtual void poll();
+
+private:
+  Client* _client;
+};
 
 #endif

@@ -17,13 +17,55 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef _ARDUINO_MODBUS_H_INCLUDED
-#define _ARDUINO_MODBUS_H_INCLUDED
+#include <errno.h>
 
-#include "ModbusRTUClient.h"
-#include "ModbusRTUServer.h"
+extern "C" {
+#include "libmodbus/modbus.h"
+#include "libmodbus/modbus-tcp.h"
+}
 
-#include "ModbusTCPClient.h"
 #include "ModbusTCPServer.h"
 
-#endif
+ModbusTCPServer::ModbusTCPServer() :
+  _client(NULL)
+{
+}
+
+ModbusTCPServer::~ModbusTCPServer()
+{
+}
+
+int ModbusTCPServer::begin(int id)
+{
+  modbus_t* mb = modbus_new_tcp(NULL, IPAddress(0, 0, 0, 0), 0);
+
+  if (!ModbusServer::begin(mb, id)) {
+    return 0;
+  }
+
+  if (modbus_tcp_listen(mb) != 0) {
+    return 0;
+  }
+
+  return 1;
+}
+
+void ModbusTCPServer::accept(Client& client)
+{
+  if (modbus_tcp_accept(_mb, &client) == 0) {
+    _client = &client;
+  }
+}
+
+void ModbusTCPServer::poll()
+{
+  if (_client != NULL) {
+    uint8_t request[MODBUS_TCP_MAX_ADU_LENGTH];
+
+    int requestLength = modbus_receive(_mb, request);
+
+    if (requestLength > 0) {
+      modbus_reply(_mb, request, requestLength, &_mbMapping);
+    }
+  }
+}

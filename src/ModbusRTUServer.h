@@ -17,13 +17,33 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef _ARDUINO_MODBUS_H_INCLUDED
-#define _ARDUINO_MODBUS_H_INCLUDED
+#ifndef _MODBUS_RTU_SERVER_H_INCLUDED
+#define _MODBUS_RTU_SERVER_H_INCLUDED
 
-#include "ModbusRTUClient.h"
-#include "ModbusRTUServer.h"
+#include "ModbusServer.h"
 
-#include "ModbusTCPClient.h"
-#include "ModbusTCPServer.h"
+class ModbusRTUServerClass : public ModbusServer {
+public:
+  ModbusRTUServerClass();
+  virtual ~ModbusRTUServerClass();
+
+  /**
+   * Start the Modbus RTU server with the specified parameters
+   *
+   * @param id (slave) id of the server
+   * @param baudrate Baud rate to use
+   * @param config serial config. to use defaults to SERIAL_8N1
+   *
+   * Return 1 on success, 0 on failure
+   */
+  int begin(int id, unsigned long baudrate, uint16_t config = SERIAL_8N1);
+
+  /**
+   * Poll interface for requests
+   */
+  virtual void poll();
+};
+
+extern ModbusRTUServerClass ModbusRTUServer;
 
 #endif

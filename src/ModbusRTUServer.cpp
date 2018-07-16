@@ -17,13 +17,45 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef _ARDUINO_MODBUS_H_INCLUDED
-#define _ARDUINO_MODBUS_H_INCLUDED
+#include <errno.h>
 
-#include "ModbusRTUClient.h"
+extern "C" {
+#include "libmodbus/modbus.h"
+#include "libmodbus/modbus-rtu.h"
+}
+
 #include "ModbusRTUServer.h"
 
-#include "ModbusTCPClient.h"
-#include "ModbusTCPServer.h"
+ModbusRTUServerClass::ModbusRTUServerClass()
+{
+}
 
-#endif
+ModbusRTUServerClass::~ModbusRTUServerClass()
+{
+}
+
+int ModbusRTUServerClass::begin(int id, unsigned long baudrate, uint16_t config)
+{
+  modbus_t* mb = modbus_new_rtu(baudrate, config);
+
+  if (!ModbusServer::begin(mb, id)) {
+    return 0;
+  }
+
+  modbus_connect(mb);
+
+  return 1;
+}
+
+void ModbusRTUServerClass::poll()
+{
+  uint8_t request[MODBUS_RTU_MAX_ADU_LENGTH];
+
+  int requestLength = modbus_receive(_mb, request);
+
+  if (requestLength > 0) {
+    modbus_reply(_mb, request, requestLength, &_mbMapping);
+  }
+}
+
+ModbusRTUServerClass ModbusRTUServer;

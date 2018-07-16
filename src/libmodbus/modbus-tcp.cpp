@@ -26,6 +26,11 @@
 # include <ws2tcpip.h>
 # define SHUT_RDWR 2
 # define close closesocket
+#elif defined(ARDUINO)
+#ifndef DEBUG
+#define printf(...) {}
+#define fprintf(...) {}
+#endif
 #else
 # include <sys/socket.h>
 # include <sys/ioctl.h>
@@ -48,6 +53,26 @@
 
 #if defined(_AIX) && !defined(MSG_DONTWAIT)
 #define MSG_DONTWAIT MSG_NONBLOCK
+#endif
+
+#if defined(ARDUINO) && defined(__AVR__)
+#undef EIO
+#define EIO 5
+
+#undef EINVAL
+#define EINVAL 22
+
+#undef ENOPROTOOPT
+#define ENOPROTOOPT 109
+
+#undef ECONNREFUSED
+#define ECONNREFUSED 111
+
+#undef ETIMEDOUT
+#define ETIMEDOUT 116
+
+#undef ENOTSUP
+#define ENOTSUP 134
 #endif
 
 #include "modbus-private.h"
@@ -93,7 +118,11 @@ static int _modbus_tcp_build_request_basis(modbus_t *ctx, int function,
                                            int addr, int nb,
                                            uint8_t *req)
 {
+#ifdef ARDUINO
+    modbus_tcp_t *ctx_tcp = (modbus_tcp_t*)ctx->backend_data;
+#else
     modbus_tcp_t *ctx_tcp = ctx->backend_data;
+#endif
 
     /* Increase transaction ID */
     if (ctx_tcp->t_id < UINT16_MAX)
@@ -146,6 +175,9 @@ static int _modbus_tcp_build_response_basis(sft_t *sft, uint8_t *rsp)
 
 static int _modbus_tcp_prepare_response_tid(const uint8_t *req, int *req_length)
 {
+#ifdef ARDUINO
+    (void)req_length;
+#endif
     return (req[0] << 8) + req[1];
 }
 
@@ -162,11 +194,17 @@ static int _modbus_tcp_send_msg_pre(uint8_t *req, int req_length)
 
 static ssize_t _modbus_tcp_send(modbus_t *ctx, const uint8_t *req, int req_length)
 {
+#ifdef ARDUINO
+    modbus_tcp_t *ctx_tcp = (modbus_tcp_t*)ctx->backend_data;
+
+    return ctx_tcp->client->write(req, req_length);
+#else
     /* MSG_NOSIGNAL
        Requests not to send SIGPIPE on errors on stream oriented
        sockets when the other end breaks the connection.  The EPIPE
        error is still returned. */
     return send(ctx->s, (const char *)req, req_length, MSG_NOSIGNAL);
+#endif
 }
 
 static int _modbus_tcp_receive(modbus_t *ctx, uint8_t *req) {
@@ -174,17 +212,30 @@ static int _modbus_tcp_receive(modbus_t *ctx, uint8_t *req) {
 }
 
 static ssize_t _modbus_tcp_recv(modbus_t *ctx, uint8_t *rsp, int rsp_length) {
+#ifdef ARDUINO
+    modbus_tcp_t *ctx_tcp = (modbus_tcp_t*)ctx->backend_data;
+
+    return ctx_tcp->client->read(rsp, rsp_length);
+#else
     return recv(ctx->s, (char *)rsp, rsp_length, 0);
+#endif
 }
 
 static int _modbus_tcp_check_integrity(modbus_t *ctx, uint8_t *msg, const int msg_length)
 {
+#ifdef ARDUINO
+    (void)ctx;
+    (void)msg;
+#endif
     return msg_length;
 }
 
 static int _modbus_tcp_pre_check_confirmation(modbus_t *ctx, const uint8_t *req,
                                               const uint8_t *rsp, int rsp_length)
 {
+#ifdef ARDUINO
+    (void)rsp_length;
+#endif
     /* Check transaction ID */
     if (req[0] != rsp[0] || req[1] != rsp[1]) {
         if (ctx->debug) {
@@ -208,6 +259,7 @@ static int _modbus_tcp_pre_check_confirmation(modbus_t *ctx, const uint8_t *req,
     return 0;
 }
 
+#ifndef ARDUINO
 static int _modbus_tcp_set_ipv4_options(int s)
 {
     int rc;
@@ -295,15 +347,20 @@ static int _connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen,
     }
     return rc;
 }
+#endif
 
 /* Establishes a modbus TCP connection with a Modbus server. */
 static int _modbus_tcp_connect(modbus_t *ctx)
 {
+#ifdef ARDUINO
+    modbus_tcp_t *ctx_tcp = (modbus_tcp_t*)ctx->backend_data;
+#else
     int rc;
     /* Specialized version of sockaddr for Internet socket address (same size) */
     struct sockaddr_in addr;
     modbus_tcp_t *ctx_tcp = ctx->backend_data;
     int flags = SOCK_STREAM;
+#endif
 
 #ifdef OS_WIN32
     if (_modbus_tcp_init_win32() == -1) {
@@ -311,6 +368,11 @@ static int _modbus_tcp_connect(modbus_t *ctx)
     }
 #endif
 
+#ifdef ARDUINO
+    if (!ctx_tcp->client->connect(ctx_tcp->ip, ctx_tcp->port)) {
+        return -1;
+    }
+#else
 #ifdef SOCK_CLOEXEC
     flags |= SOCK_CLOEXEC;
 #endif
@@ -344,10 +406,12 @@ static int _modbus_tcp_connect(modbus_t *ctx)
         ctx->s = -1;
         return -1;
     }
+#endif
 
     return 0;
 }
 
+#ifndef ARDUINO
 /* Establishes a modbus TCP PI connection with a Modbus server. */
 static int _modbus_tcp_pi_connect(modbus_t *ctx)
 {
@@ -425,19 +489,35 @@ static int _modbus_tcp_pi_connect(modbus_t *ctx)
 
     return 0;
 }
+#endif
 
 /* Closes the network connection and socket in TCP mode */
 static void _modbus_tcp_close(modbus_t *ctx)
 {
+#ifdef ARDUINO
+    modbus_tcp_t *ctx_tcp = (modbus_tcp_t*)ctx->backend_data;
+
+    ctx_tcp->client->stop();
+#else
     if (ctx->s != -1) {
         shutdown(ctx->s, SHUT_RDWR);
         close(ctx->s);
         ctx->s = -1;
     }
+#endif
 }
 
 static int _modbus_tcp_flush(modbus_t *ctx)
 {
+#ifdef ARDUINO
+    modbus_tcp_t *ctx_tcp = (modbus_tcp_t*)ctx->backend_data;
+
+    while (ctx_tcp->client->available()) {
+        ctx_tcp->client->read();
+    }
+
+    return 0;
+#else
     int rc;
     int rc_sum = 0;
 
@@ -471,21 +551,31 @@ static int _modbus_tcp_flush(modbus_t *ctx)
     } while (rc == MODBUS_TCP_MAX_ADU_LENGTH);
 
     return rc_sum;
+#endif
 }
 
 /* Listens for any request from one or many modbus masters in TCP */
+#ifdef ARDUINO
+int modbus_tcp_listen(modbus_t *ctx)
+#else
 int modbus_tcp_listen(modbus_t *ctx, int nb_connection)
+#endif
 {
+#ifndef ARDUINO
     int new_s;
     int enable;
     struct sockaddr_in addr;
     modbus_tcp_t *ctx_tcp;
+#endif
 
     if (ctx == NULL) {
         errno = EINVAL;
         return -1;
     }
 
+#ifdef ARDUINO
+    return 0;
+#else
     ctx_tcp = ctx->backend_data;
 
 #ifdef OS_WIN32
@@ -528,8 +618,10 @@ int modbus_tcp_listen(modbus_t *ctx, int nb_connection)
     }
 
     return new_s;
+#endif
 }
 
+#ifndef ARDUINO
 int modbus_tcp_pi_listen(modbus_t *ctx, int nb_connection)
 {
     int rc;
@@ -641,17 +733,37 @@ int modbus_tcp_pi_listen(modbus_t *ctx, int nb_connection)
 
     return new_s;
 }
+#endif
 
+
+#ifdef ARDUINO
+int modbus_tcp_accept(modbus_t *ctx, Client* client)
+#else
 int modbus_tcp_accept(modbus_t *ctx, int *s)
+#endif
 {
+#ifndef ARDUINO
     struct sockaddr_in addr;
     socklen_t addrlen;
+#endif
 
     if (ctx == NULL) {
         errno = EINVAL;
         return -1;
     }
 
+#ifdef ARDUINO
+    if (client == NULL) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    modbus_tcp_t *ctx_tcp = (modbus_tcp_t*)ctx->backend_data;
+
+    ctx_tcp->client = client;
+
+    return 0;
+#else
     addrlen = sizeof(addr);
 #ifdef HAVE_ACCEPT4
     /* Inherit socket flags and use accept4 call */
@@ -672,8 +784,10 @@ int modbus_tcp_accept(modbus_t *ctx, int *s)
     }
 
     return ctx->s;
+#endif
 }
 
+#ifndef ARDUINO
 int modbus_tcp_pi_accept(modbus_t *ctx, int *s)
 {
     struct sockaddr_storage addr;
@@ -702,10 +816,27 @@ int modbus_tcp_pi_accept(modbus_t *ctx, int *s)
 
     return ctx->s;
 }
+#endif
 
 static int _modbus_tcp_select(modbus_t *ctx, fd_set *rset, struct timeval *tv, int length_to_read)
 {
     int s_rc;
+#ifdef ARDUINO
+    (void)rset;
+
+    modbus_tcp_t *ctx_tcp = (modbus_tcp_t*)ctx->backend_data;
+
+    unsigned long wait_time_millis = (tv == NULL) ? 0 : (tv->tv_sec * 1000) + (tv->tv_usec / 1000);
+    unsigned long start = millis();
+
+    do {
+        s_rc = ctx_tcp->client->available();
+
+        if (s_rc == length_to_read) {
+            break;
+        }
+    } while ((millis() - start) < wait_time_millis);
+#else
     while ((s_rc = select(ctx->s+1, rset, NULL, NULL, tv)) == -1) {
         if (errno == EINTR) {
             if (ctx->debug) {
@@ -718,6 +849,7 @@ static int _modbus_tcp_select(modbus_t *ctx, fd_set *rset, struct timeval *tv, i
             return -1;
         }
     }
+#endif
 
     if (s_rc == 0) {
         errno = ETIMEDOUT;
@@ -755,6 +887,7 @@ const modbus_backend_t _modbus_tcp_backend = {
 };
 
 
+#ifndef ARDUINO
 const modbus_backend_t _modbus_tcp_pi_backend = {
     _MODBUS_BACKEND_TYPE_TCP,
     _MODBUS_TCP_HEADER_LENGTH,
@@ -776,13 +909,20 @@ const modbus_backend_t _modbus_tcp_pi_backend = {
     _modbus_tcp_select,
     _modbus_tcp_free
 };
+#endif
 
+#ifdef ARDUINO
+modbus_t* modbus_new_tcp(Client* client, IPAddress ip_address, int port)
+#else
 modbus_t* modbus_new_tcp(const char *ip, int port)
+#endif
 {
     modbus_t *ctx;
     modbus_tcp_t *ctx_tcp;
+#ifndef ARDUINO
     size_t dest_size;
     size_t ret_size;
+#endif
 
 #if defined(OS_BSD)
     /* MSG_NOSIGNAL is unsupported on *BSD so we install an ignore
@@ -808,6 +948,10 @@ modbus_t* modbus_new_tcp(const char *ip, int port)
     ctx->backend_data = (modbus_tcp_t *)malloc(sizeof(modbus_tcp_t));
     ctx_tcp = (modbus_tcp_t *)ctx->backend_data;
 
+#ifdef ARDUINO
+    ctx_tcp->client = client;
+    ctx_tcp->ip = ip_address;
+#else
     if (ip != NULL) {
         dest_size = sizeof(char) * 16;
         ret_size = strlcpy(ctx_tcp->ip, ip, dest_size);
@@ -827,6 +971,7 @@ modbus_t* modbus_new_tcp(const char *ip, int port)
     } else {
         ctx_tcp->ip[0] = '0';
     }
+#endif
     ctx_tcp->port = port;
     ctx_tcp->t_id = 0;
 
@@ -834,6 +979,7 @@ modbus_t* modbus_new_tcp(const char *ip, int port)
 }
 
 
+#ifndef ARDUINO
 modbus_t* modbus_new_tcp_pi(const char *node, const char *service)
 {
     modbus_t *ctx;
@@ -899,3 +1045,4 @@ modbus_t* modbus_new_tcp_pi(const char *node, const char *service)
 
     return ctx;
 }
+#endif

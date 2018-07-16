@@ -7,6 +7,12 @@
 #ifndef MODBUS_TCP_PRIVATE_H
 #define MODBUS_TCP_PRIVATE_H
 
+#ifdef ARDUINO
+#include <Arduino.h>
+#include <IPAddress.h>
+#include <Client.h>
+#endif
+
 #define _MODBUS_TCP_HEADER_LENGTH      7
 #define _MODBUS_TCP_PRESET_REQ_LENGTH 12
 #define _MODBUS_TCP_PRESET_RSP_LENGTH  8
@@ -23,8 +29,13 @@ typedef struct _modbus_tcp {
     uint16_t t_id;
     /* TCP port */
     int port;
+#ifdef ARDUINO
+    IPAddress ip;
+    Client* client;
+#else
     /* IP address */
     char ip[16];
+#endif
 } modbus_tcp_t;
 
 #define _MODBUS_TCP_PI_NODE_LENGTH    1025

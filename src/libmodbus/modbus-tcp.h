@@ -7,6 +7,11 @@
 #ifndef MODBUS_TCP_H
 #define MODBUS_TCP_H
 
+#ifdef ARDUINO
+class Client;
+class IPAddress;
+#endif
+
 #include "modbus.h"
 
 MODBUS_BEGIN_DECLS
@@ -39,6 +44,11 @@ MODBUS_BEGIN_DECLS
  */
 #define MODBUS_TCP_MAX_ADU_LENGTH  260
 
+#ifdef ARDUINO
+MODBUS_API modbus_t* modbus_new_tcp(Client* client, IPAddress ip_address, int port);
+MODBUS_API int modbus_tcp_listen(modbus_t *ctx);
+MODBUS_API int modbus_tcp_accept(modbus_t *ctx, Client* client);
+#else
 MODBUS_API modbus_t* modbus_new_tcp(const char *ip_address, int port);
 MODBUS_API int modbus_tcp_listen(modbus_t *ctx, int nb_connection);
 MODBUS_API int modbus_tcp_accept(modbus_t *ctx, int *s);
@@ -46,6 +56,7 @@ MODBUS_API int modbus_tcp_accept(modbus_t *ctx, int *s);
 MODBUS_API modbus_t* modbus_new_tcp_pi(const char *node, const char *service);
 MODBUS_API int modbus_tcp_pi_listen(modbus_t *ctx, int nb_connection);
 MODBUS_API int modbus_tcp_pi_accept(modbus_t *ctx, int *s);
+#endif
 
 MODBUS_END_DECLS
 

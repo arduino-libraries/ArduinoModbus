@@ -7,13 +7,44 @@
 #######################################
 
 ArduinoModbus	KEYWORD1
+ModbusRTUClient	KEYWORD1
+ModbusRTUServer	KEYWORD1
+ModbusRTUClient	KEYWORD1
+ModbusTCPServer	KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
 #######################################
 
 begin	KEYWORD2
+poll	KEYWORD2
 end	KEYWORD2
+
+setId	KEYWORD2
+readCoil	KEYWORD2
+readCoils	KEYWORD2
+readDiscreteInput	KEYWORD2
+readDiscreteInputs	KEYWORD2
+readHoldingRegister	KEYWORD2
+readHoldingRegisters	KEYWORD2
+readInputRegister	KEYWORD2
+readInputRegisters	KEYWORD2
+writeCoil	KEYWORD2
+writeCoils	KEYWORD2
+writeHoldingRegister	KEYWORD2
+writeHoldingRegisters	KEYWORD2
+maskWriteRegister	KEYWORD2
+writeAndReadRegisters	KEYWORD2
+lastError	KEYWORD2
+
+configureCoils	KEYWORD2
+configureDiscreteInputs	KEYWORD2
+configureHoldingRegisters	KEYWORD2
+configureInputRegisters	KEYWORD2
+writeDiscreteInput	KEYWORD2
+writeDiscreteInputs	KEYWORD2
+writeInputRegister	KEYWORD2
+writeInputRegisters	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)

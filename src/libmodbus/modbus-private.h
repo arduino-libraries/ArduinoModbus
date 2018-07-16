@@ -16,7 +16,9 @@
 typedef int ssize_t;
 #endif
 #include <sys/types.h>
+#ifndef ARDUINO
 #include <config.h>
+#endif
 
 #include "modbus.h"
 

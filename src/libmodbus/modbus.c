@@ -17,8 +17,13 @@
 #ifndef _MSC_VER
 #include <unistd.h>
 #endif
+#ifdef ARDUINO
+#include <Arduino.h>
+#endif
 
+#ifndef ARDUINO
 #include <config.h>
+#endif
 
 #include "modbus.h"
 #include "modbus-private.h"
@@ -97,6 +102,9 @@ static void _sleep_response_timeout(modbus_t *ctx)
     /* usleep doesn't exist on Windows */
     Sleep((ctx->response_timeout.tv_sec * 1000) +
           (ctx->response_timeout.tv_usec / 1000));
+#elif defined(ARDUINO)
+    delay(ctx->response_timeout.tv_sec * 1000);
+    delayMicroseconds(ctx->response_timeout.tv_usec);
 #else
     /* usleep source code */
     struct timespec request, remaining;

@@ -281,8 +281,10 @@ MODBUS_API void modbus_set_float_dcba(float f, uint16_t *dest);
 MODBUS_API void modbus_set_float_badc(float f, uint16_t *dest);
 MODBUS_API void modbus_set_float_cdab(float f, uint16_t *dest);
 
+#ifndef ARDUINO
 #include "modbus-tcp.h"
 #include "modbus-rtu.h"
+#endif
 
 MODBUS_END_DECLS
 

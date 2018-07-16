@@ -17,11 +17,25 @@
 
 #if defined(_WIN32)
 #  include <winsock2.h>
+#elif defined(ARDUINO)
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#define htonl(x) bswap_32(x)
+#define htons(x) bswap_16(x)
+#define ntohl(x) bswap_32(x)
+#define ntohs(x) bswap_32(x)
+#else
+#define htonl(x) (x)
+#define htons(x) (x)
+#define ntohl(x) (x)
+#define ntohs(x) (x)
+#endif
 #else
 #  include <arpa/inet.h>
 #endif
 
+#ifndef ARDUINO
 #include <config.h>
+#endif
 
 #include "modbus.h"
 
@@ -51,7 +65,9 @@
 #endif
 
 #if !defined(__CYGWIN__) && !defined(bswap_16)
+#ifndef ARDUINO
 #  warning "Fallback on C functions for bswap_16"
+#endif
 static inline uint16_t bswap_16(uint16_t x)
 {
     return (x >> 8) | (x << 8);
@@ -59,7 +75,9 @@ static inline uint16_t bswap_16(uint16_t x)
 #endif
 
 #if !defined(bswap_32)
+#ifndef ARDUINO
 #  warning "Fallback on C functions for bswap_32"
+#endif
 static inline uint32_t bswap_32(uint32_t x)
 {
     return (bswap_16(x & 0xffff) << 16) | (bswap_16(x >> 16));

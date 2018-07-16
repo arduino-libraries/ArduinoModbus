@@ -1,5 +1,5 @@
 /*
-  This file is part of the Modbus library.
+  This file is part of the ArduinoModbus library.
   Copyright (c) 2018 Arduino SA. All rights reserved.
 
   This library is free software; you can redistribute it and/or
@@ -17,8 +17,8 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef _MODBUS_H_INCLUDED
-#define _MODBUS_H_INCLUDED
+#ifndef _ARDUINO_MODBUS_H_INCLUDED
+#define _ARDUINO_MODBUS_H_INCLUDED
 
 #include "ModbusRTUClient.h"
 #include "ModbusTCPClient.h"

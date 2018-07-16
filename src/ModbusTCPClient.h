@@ -1,5 +1,5 @@
 /*
-  This file is part of the Modbus library.
+  This file is part of the ArduinoModbus library.
   Copyright (c) 2018 Arduino SA. All rights reserved.
 
   This library is free software; you can redistribute it and/or

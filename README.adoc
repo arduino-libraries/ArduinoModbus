@@ -1,7 +1,7 @@
 = Modbus Library for Arduino =
 
 For more information about this library please visit us at
-http://www.arduino.cc/en/Reference/Modbus
+http://www.arduino.cc/en/Reference/ArduinoModbus
 
 == License ==
 

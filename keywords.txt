@@ -1,12 +1,12 @@
 #######################################
-# Syntax Coloring Map For Modbus
+# Syntax Coloring Map For ArduinoModbus
 #######################################
 
 #######################################
 # Datatypes (KEYWORD1)
 #######################################
 
-Modbus	KEYWORD1
+ArduinoModbus	KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)

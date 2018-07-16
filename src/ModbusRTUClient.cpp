@@ -34,9 +34,9 @@ ModbusRTUClientClass::~ModbusRTUClientClass()
 {
 }
 
-int ModbusRTUClientClass::begin(unsigned long baudRate, uint16_t config)
+int ModbusRTUClientClass::begin(unsigned long baudrate, uint16_t config)
 {
-  modbus_t* mb = modbus_new_rtu(baudRate, config);
+  modbus_t* mb = modbus_new_rtu(baudrate, config);
 
   return ModbusClient::begin(mb);
 }

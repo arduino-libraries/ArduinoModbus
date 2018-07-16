@@ -1,5 +1,9 @@
 = Modbus Library for Arduino =
 
+Use Modbus with your Arduino. 
+
+Using the RS485 shields, like the MKR 485 shield. This library depends on the ArduinoRS485 library.
+
 For more information about this library please visit us at
 http://www.arduino.cc/en/Reference/ArduinoModbus
 

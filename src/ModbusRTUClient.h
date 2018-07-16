@@ -27,8 +27,15 @@ public:
   ModbusRTUClientClass();
   virtual ~ModbusRTUClientClass();
 
-  int begin(unsigned long baudRate, uint16_t config = SERIAL_8N1);
-  void end();
+  /**
+   * Start the Modbus RTU client with the specified parameters
+   *
+   * @param baudrate Baud rate to use
+   * @param config serial config. to use defaults to SERIAL_8N1
+   *
+   * Return 1 on success, 0 on failure
+   */
+  int begin(unsigned long baudrate, uint16_t config = SERIAL_8N1);
 };
 
 extern ModbusRTUClientClass ModbusRTUClient;

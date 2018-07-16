@@ -165,7 +165,7 @@ int ModbusClient::writeCoils(int address, const uint8_t values[], int nb)
   return 1;
 }
 
-int ModbusClient::writeRegister(int address, uint16_t value)
+int ModbusClient::writeHoldingRegister(int address, uint16_t value)
 {
   if (modbus_write_register(_mb, address, value) < 0) {
     return 0;
@@ -174,7 +174,7 @@ int ModbusClient::writeRegister(int address, uint16_t value)
   return 1;
 }
 
-int ModbusClient::writeRegisters(int address, const uint16_t values[], int nb)
+int ModbusClient::writeHoldingRegisters(int address, const uint16_t values[], int nb)
 {
   if (modbus_write_registers(_mb, address, nb, values) < 0) {
     return 0;

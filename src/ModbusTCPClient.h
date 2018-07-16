@@ -27,11 +27,23 @@
 
 class ModbusTCPClient : public ModbusClient {
 public:
+  /**
+   * ModbusTCPClient constructor
+   *
+   * @param client Client to use for TCP connection
+   */
   ModbusTCPClient(Client& client);
   virtual ~ModbusTCPClient();
 
+  /**
+   * Start the Modbus TCP client with the specified parameters
+   *
+   * @param ip IP Address of the Modbus server
+   * @param port TCP port number of Modbus server, defaults to 502
+   *
+   * Return 1 on success, 0 on failure
+   */
   int begin(IPAddress ip, uint16_t port = 502);
-  void end();
 
 private:
   Client* _client;

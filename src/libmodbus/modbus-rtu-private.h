@@ -15,6 +15,8 @@
 
 #if defined(_WIN32)
 #include <windows.h>
+#elif defined(ARDUINO)
+// nothing extra needed
 #else
 #include <termios.h>
 #endif
@@ -43,6 +45,10 @@ struct win32_ser {
 #endif /* _WIN32 */
 
 typedef struct _modbus_rtu {
+#if defined(ARDUINO)
+    unsigned long baud;
+    uint16_t config;
+#else
     /* Device: "/dev/ttyS0", "/dev/ttyUSB0" or "/dev/tty.USA19*" on Mac OS X. */
     char *device;
     /* Bauds: 9600, 19200, 57600, 115200, etc */
@@ -68,6 +74,7 @@ typedef struct _modbus_rtu {
     int rts_delay;
     int onebyte_time;
     void (*set_rts) (modbus_t *ctx, int on);
+#endif
 #endif
     /* To handle many slaves on the same link */
     int confirmation_to_ignore;

@@ -16,6 +16,9 @@ MODBUS_BEGIN_DECLS
  */
 #define MODBUS_RTU_MAX_ADU_LENGTH  256
 
+#ifdef ARDUINO
+MODBUS_API modbus_t* modbus_new_rtu(unsigned long baud, uint16_t config);
+#else
 MODBUS_API modbus_t* modbus_new_rtu(const char *device, int baud, char parity,
                                     int data_bit, int stop_bit);
 
@@ -36,6 +39,7 @@ MODBUS_API int modbus_rtu_set_custom_rts(modbus_t *ctx, void (*set_rts) (modbus_
 
 MODBUS_API int modbus_rtu_set_rts_delay(modbus_t *ctx, int us);
 MODBUS_API int modbus_rtu_get_rts_delay(modbus_t *ctx);
+#endif
 
 MODBUS_END_DECLS
 

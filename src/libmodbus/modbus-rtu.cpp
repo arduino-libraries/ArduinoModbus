@@ -14,6 +14,10 @@
 #endif
 #include <assert.h>
 
+#ifdef ARDUINO
+#include <RS485.h>
+#endif
+
 #include "modbus-private.h"
 
 #include "modbus-rtu.h"
@@ -147,6 +151,9 @@ static uint16_t crc16(uint8_t *buffer, uint16_t buffer_length)
 
 static int _modbus_rtu_prepare_response_tid(const uint8_t *req, int *req_length)
 {
+#ifdef ARDUINO
+    (void)req;
+#endif
     (*req_length) -= _MODBUS_RTU_CHECKSUM_LENGTH;
     /* No TID */
     return 0;
@@ -273,6 +280,16 @@ static ssize_t _modbus_rtu_send(modbus_t *ctx, const uint8_t *req, int req_lengt
     modbus_rtu_t *ctx_rtu = ctx->backend_data;
     DWORD n_bytes = 0;
     return (WriteFile(ctx_rtu->w_ser.fd, req, req_length, &n_bytes, NULL)) ? (ssize_t)n_bytes : -1;
+#elif defined(ARDUINO)
+    (void)ctx;
+
+    ssize_t size;
+
+    RS485.beginTransmission();
+    size = RS485.write(req, req_length);
+    RS485.endTransmission();
+
+    return size;
 #else
 #if HAVE_DECL_TIOCM_RTS
     modbus_rtu_t *ctx_rtu = ctx->backend_data;
@@ -304,7 +321,11 @@ static ssize_t _modbus_rtu_send(modbus_t *ctx, const uint8_t *req, int req_lengt
 static int _modbus_rtu_receive(modbus_t *ctx, uint8_t *req)
 {
     int rc;
+#ifdef ARDUINO
+    modbus_rtu_t *ctx_rtu = (modbus_rtu_t*)ctx->backend_data;
+#else
     modbus_rtu_t *ctx_rtu = ctx->backend_data;
+#endif
 
     if (ctx_rtu->confirmation_to_ignore) {
         _modbus_receive_msg(ctx, req, MSG_CONFIRMATION);
@@ -328,6 +349,10 @@ static ssize_t _modbus_rtu_recv(modbus_t *ctx, uint8_t *rsp, int rsp_length)
 {
 #if defined(_WIN32)
     return win32_ser_read(&((modbus_rtu_t *)ctx->backend_data)->w_ser, rsp, rsp_length);
+#elif defined(ARDUINO)
+    (void)ctx;
+
+    return RS485.readBytes(rsp, rsp_length);
 #else
     return read(ctx->s, rsp, rsp_length);
 #endif
@@ -338,6 +363,9 @@ static int _modbus_rtu_flush(modbus_t *);
 static int _modbus_rtu_pre_check_confirmation(modbus_t *ctx, const uint8_t *req,
                                               const uint8_t *rsp, int rsp_length)
 {
+#ifdef ARDUINO
+    (void)rsp_length;
+#endif
     /* Check responding slave is the slave we requested (except for broacast
      * request) */
     if (req[0] != rsp[0] && req[0] != MODBUS_BROADCAST_ADDRESS) {
@@ -398,11 +426,16 @@ static int _modbus_rtu_connect(modbus_t *ctx)
 {
 #if defined(_WIN32)
     DCB dcb;
+#elif defined(ARDUINO)
+    // nothing extra needed
 #else
     struct termios tios;
     speed_t speed;
     int flags;
 #endif
+#ifdef ARDUINO
+    modbus_rtu_t *ctx_rtu = (modbus_rtu_t*)ctx->backend_data;
+#else
     modbus_rtu_t *ctx_rtu = ctx->backend_data;
 
     if (ctx->debug) {
@@ -410,6 +443,7 @@ static int _modbus_rtu_connect(modbus_t *ctx)
                ctx_rtu->device, ctx_rtu->baud, ctx_rtu->parity,
                ctx_rtu->data_bit, ctx_rtu->stop_bit);
     }
+#endif
 
 #if defined(_WIN32)
     /* Some references here:
@@ -575,6 +609,9 @@ static int _modbus_rtu_connect(modbus_t *ctx)
         ctx_rtu->w_ser.fd = INVALID_HANDLE_VALUE;
         return -1;
     }
+#elif defined(ARDUINO)
+    RS485.begin(ctx_rtu->baud, ctx_rtu->config);
+    RS485.receive();
 #else
     /* The O_NOCTTY flag tells UNIX that this program doesn't want
        to be the "controlling terminal" for that port. If you
@@ -898,6 +935,7 @@ static int _modbus_rtu_connect(modbus_t *ctx)
     return 0;
 }
 
+#ifndef ARDUINO
 int modbus_rtu_set_serial_mode(modbus_t *ctx, int mode)
 {
     if (ctx == NULL) {
@@ -1103,11 +1141,16 @@ int modbus_rtu_set_rts_delay(modbus_t *ctx, int us)
         return -1;
     }
 }
+#endif
 
 static void _modbus_rtu_close(modbus_t *ctx)
 {
     /* Restore line settings and close file descriptor in RTU mode */
+#ifdef ARDUINO
+    modbus_rtu_t *ctx_rtu = (modbus_rtu_t*)ctx->backend_data;
+#else
     modbus_rtu_t *ctx_rtu = ctx->backend_data;
+#endif
 
 #if defined(_WIN32)
     /* Revert settings */
@@ -1120,6 +1163,11 @@ static void _modbus_rtu_close(modbus_t *ctx)
         fprintf(stderr, "ERROR Error while closing handle (LastError %d)\n",
                 (int)GetLastError());
     }
+#elif defined(ARDUINO)
+    (void)ctx_rtu;
+
+    RS485.noReceive();
+    RS485.end();
 #else
     if (ctx->s != -1) {
         tcsetattr(ctx->s, TCSANOW, &ctx_rtu->old_tios);
@@ -1135,6 +1183,14 @@ static int _modbus_rtu_flush(modbus_t *ctx)
     modbus_rtu_t *ctx_rtu = ctx->backend_data;
     ctx_rtu->w_ser.n_bytes = 0;
     return (PurgeComm(ctx_rtu->w_ser.fd, PURGE_RXCLEAR) == FALSE);
+#elif defined(ARDUINO)
+    (void)ctx;
+
+    while (RS485.available()) {
+        RS485.read();
+    }
+
+    return 0;
 #else
     return tcflush(ctx->s, TCIOFLUSH);
 #endif
@@ -1153,6 +1209,26 @@ static int _modbus_rtu_select(modbus_t *ctx, fd_set *rset,
     }
 
     if (s_rc < 0) {
+        return -1;
+    }
+#elif defined(ARDUINO)
+    (void)ctx;
+    (void)rset;
+
+    unsigned long wait_time_millis = (tv == NULL) ? 0 : (tv->tv_sec * 1000) + (tv->tv_usec / 1000);
+    unsigned long start = millis();
+
+    do {
+        s_rc = RS485.available();
+
+        if (s_rc == length_to_read) {
+            break;
+        }
+    } while ((millis() - start) < wait_time_millis);
+
+    if (s_rc == 0) {
+        /* Timeout */
+        errno = ETIMEDOUT;
         return -1;
     }
 #else
@@ -1180,7 +1256,9 @@ static int _modbus_rtu_select(modbus_t *ctx, fd_set *rset,
 }
 
 static void _modbus_rtu_free(modbus_t *ctx) {
+#ifndef ARDUINO
     free(((modbus_rtu_t*)ctx->backend_data)->device);
+#endif
     free(ctx->backend_data);
     free(ctx);
 }
@@ -1207,13 +1285,18 @@ const modbus_backend_t _modbus_rtu_backend = {
     _modbus_rtu_free
 };
 
+#ifdef ARDUINO
+modbus_t* modbus_new_rtu(unsigned long baud, uint16_t config)
+#else
 modbus_t* modbus_new_rtu(const char *device,
                          int baud, char parity, int data_bit,
                          int stop_bit)
+#endif
 {
     modbus_t *ctx;
     modbus_rtu_t *ctx_rtu;
 
+#ifndef ARDUINO
     /* Check device argument */
     if (device == NULL || *device == 0) {
         fprintf(stderr, "The device string is empty\n");
@@ -1227,12 +1310,17 @@ modbus_t* modbus_new_rtu(const char *device,
         errno = EINVAL;
         return NULL;
     }
+#endif
 
     ctx = (modbus_t *)malloc(sizeof(modbus_t));
     _modbus_init_common(ctx);
     ctx->backend = &_modbus_rtu_backend;
     ctx->backend_data = (modbus_rtu_t *)malloc(sizeof(modbus_rtu_t));
     ctx_rtu = (modbus_rtu_t *)ctx->backend_data;
+#ifdef ARDUINO
+    ctx_rtu->baud = baud;
+    ctx_rtu->config = config;
+#else
     ctx_rtu->device = NULL;
 
     /* Device name and \0 */
@@ -1267,6 +1355,7 @@ modbus_t* modbus_new_rtu(const char *device,
 
     /* The delay before and after transmission when toggling the RTS pin */
     ctx_rtu->rts_delay = ctx_rtu->onebyte_time;
+#endif
 #endif
 
     ctx_rtu->confirmation_to_ignore = FALSE;

@@ -1,5 +1,6 @@
 /*
  * Copyright © 2001-2013 Stéphane Raimbault <stephane.raimbault@gmail.com>
+ * Copyright © 2018 Arduino SA. All rights reserved.
  *
  * SPDX-License-Identifier: LGPL-2.1+
  */

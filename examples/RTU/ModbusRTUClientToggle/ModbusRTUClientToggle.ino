@@ -32,14 +32,11 @@ void setup() {
     Serial.println("Failed to start Modbus RTU Client!");
     while (1);
   }
-
-  // send requests to (slave) ID 1
-  ModbusRTUClient.setId(1);
 }
 
 void loop() {
-  // set value of coil at address 0x00 to 0x01
-  if (!ModbusRTUClient.writeCoil(0x00, 0x01)) {
+  // for (slave) id 1: write the value of 0x01, to the coil at address 0x00 
+  if (!ModbusRTUClient.writeCoil(1, 0x00, 0x01)) {
     Serial.print("Failed to write coil! ");
     Serial.println(ModbusRTUClient.lastError());
   }
@@ -47,8 +44,8 @@ void loop() {
   // wait for 1 second
   delay(1000);
 
-  // set value of coil at address 0x00 to 0x00
-  if (!ModbusRTUClient.writeCoil(0x00, 0x00)) {
+  // for (slave) id 1: write the value of 0x00, to the coil at address 0x00 
+  if (!ModbusRTUClient.writeCoil(1, 0x00, 0x00)) {
     Serial.print("Failed to write coil! ");
     Serial.println(ModbusRTUClient.lastError());
   }

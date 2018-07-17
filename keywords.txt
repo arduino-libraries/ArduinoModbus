@@ -20,7 +20,6 @@ begin	KEYWORD2
 poll	KEYWORD2
 end	KEYWORD2
 
-setId	KEYWORD2
 readCoil	KEYWORD2
 readCoils	KEYWORD2
 readDiscreteInput	KEYWORD2

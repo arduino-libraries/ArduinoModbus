@@ -62,16 +62,16 @@ void ModbusClient::end()
   }
 }
 
-void ModbusClient::setId(int id)
+int ModbusClient::readCoil(int address)
 {
-  modbus_set_slave(_mb, id);
+  return readCoil(0x00, address);
 }
 
-int ModbusClient::readCoil(int address)
+int ModbusClient::readCoil(int id, int address)
 {
   uint8_t value;
 
-  if (readCoils(address, &value, 1) < 0) {
+  if (readCoils(id, address, &value, 1) < 0) {
     return -1;
   }
 
@@ -80,6 +80,13 @@ int ModbusClient::readCoil(int address)
 
 int ModbusClient::readCoils(int address, uint8_t values[], int nb)
 {
+  return readCoils(0x00, address, values, nb);
+}
+
+int ModbusClient::readCoils(int id, int address, uint8_t values[], int nb)
+{
+  modbus_set_slave(_mb, id);
+
   if (modbus_read_bits(_mb, address, nb, values) < 0) {
     return 0;
   }
@@ -89,9 +96,14 @@ int ModbusClient::readCoils(int address, uint8_t values[], int nb)
 
 int ModbusClient::readDiscreteInput(int address)
 {
+  return readDiscreteInput(0x00, address);
+}
+
+int ModbusClient::readDiscreteInput(int id, int address)
+{
   uint8_t value;
 
-  if (!readDiscreteInputs(address, &value, 1)) {
+  if (!readDiscreteInputs(id, address, &value, 1)) {
     return -1;
   }
 
@@ -100,6 +112,13 @@ int ModbusClient::readDiscreteInput(int address)
 
 int ModbusClient::readDiscreteInputs(int address, uint8_t values[], int nb)
 {
+  return readDiscreteInputs(0x00, address, values, nb);
+}
+
+int ModbusClient::readDiscreteInputs(int id, int address, uint8_t values[], int nb)
+{
+  modbus_set_slave(_mb, id);
+
   if (modbus_read_input_bits(_mb, address, nb, values) < 0) {
     return 0;
   }
@@ -109,9 +128,14 @@ int ModbusClient::readDiscreteInputs(int address, uint8_t values[], int nb)
 
 long ModbusClient::readHoldingRegister(int address)
 {
+  return readHoldingRegister(0x00, address);
+}
+
+long ModbusClient::readHoldingRegister(int id, int address)
+{
   uint16_t value;
 
-  if (!readHoldingRegisters(address, &value, 1)) {
+  if (!readHoldingRegisters(id, address, &value, 1)) {
     return -1;
   }
 
@@ -120,6 +144,13 @@ long ModbusClient::readHoldingRegister(int address)
 
 int ModbusClient::readHoldingRegisters(int address, uint16_t values[], int nb)
 {
+  return readHoldingRegisters(0x00, address, values, nb);
+}
+
+int ModbusClient::readHoldingRegisters(int id, int address, uint16_t values[], int nb)
+{
+  modbus_set_slave(_mb, id);
+
   if (modbus_read_registers(_mb, address, nb, values) < 0) {
     return 0;
   }
@@ -129,9 +160,14 @@ int ModbusClient::readHoldingRegisters(int address, uint16_t values[], int nb)
 
 long ModbusClient::readInputRegister(int address)
 {
+  return readInputRegister(0x00, address);
+}
+
+long ModbusClient::readInputRegister(int id, int address)
+{
   uint16_t value;
 
-  if (!readInputRegisters(address, &value, 1)) {
+  if (!readInputRegisters(id, address, &value, 1)) {
     return -1;
   }
 
@@ -140,6 +176,13 @@ long ModbusClient::readInputRegister(int address)
 
 int ModbusClient::readInputRegisters(int address, uint16_t values[], int nb)
 {
+  return readInputRegisters(0x00, address, values, nb);
+}
+
+int ModbusClient::readInputRegisters(int id, int address, uint16_t values[], int nb)
+{
+  modbus_set_slave(_mb, id);
+
   if (modbus_read_input_registers(_mb, address, nb, values) < 0) {
     return 0;
   }
@@ -149,6 +192,13 @@ int ModbusClient::readInputRegisters(int address, uint16_t values[], int nb)
 
 int ModbusClient::writeCoil(int address, uint8_t value)
 {
+  return writeCoil(0x00, address, value);
+}
+
+int ModbusClient::writeCoil(int id, int address, uint8_t value)
+{
+  modbus_set_slave(_mb, id);
+
   if (modbus_write_bit(_mb, address, value) < 0) {
     return 0;
   }
@@ -158,6 +208,13 @@ int ModbusClient::writeCoil(int address, uint8_t value)
 
 int ModbusClient::writeCoils(int address, const uint8_t values[], int nb)
 {
+  return writeCoils(0x00, address, values, nb);
+}
+
+int ModbusClient::writeCoils(int id, int address, const uint8_t values[], int nb)
+{
+  modbus_set_slave(_mb, id);
+
   if (modbus_write_bits(_mb, address, nb, values) < 0) {
     return 0;
   }
@@ -167,6 +224,13 @@ int ModbusClient::writeCoils(int address, const uint8_t values[], int nb)
 
 int ModbusClient::writeHoldingRegister(int address, uint16_t value)
 {
+  return writeHoldingRegister(0x00, address, value);
+}
+
+int ModbusClient::writeHoldingRegister(int id, int address, uint16_t value)
+{
+  modbus_set_slave(_mb, id);
+
   if (modbus_write_register(_mb, address, value) < 0) {
     return 0;
   }
@@ -176,6 +240,13 @@ int ModbusClient::writeHoldingRegister(int address, uint16_t value)
 
 int ModbusClient::writeHoldingRegisters(int address, const uint16_t values[], int nb)
 {
+  return writeHoldingRegisters(0x00, address, values, nb);
+}
+
+int ModbusClient::writeHoldingRegisters(int id, int address, const uint16_t values[], int nb)
+{
+  modbus_set_slave(_mb, id);
+
   if (modbus_write_registers(_mb, address, nb, values) < 0) {
     return 0;
   }
@@ -185,6 +256,13 @@ int ModbusClient::writeHoldingRegisters(int address, const uint16_t values[], in
 
 int ModbusClient::maskWriteRegister(int address, uint16_t andMask, uint16_t orMask)
 {
+  return maskWriteRegister(0x00, address, andMask, orMask);
+}
+
+int ModbusClient::maskWriteRegister(int id, int address, uint16_t andMask, uint16_t orMask)
+{
+  modbus_set_slave(_mb, id);
+
   if (modbus_mask_write_register(_mb, address, andMask, orMask) < 0) {
     return 0;
   }
@@ -194,6 +272,13 @@ int ModbusClient::maskWriteRegister(int address, uint16_t andMask, uint16_t orMa
 
 int ModbusClient::writeAndReadRegisters(int writeAddress, const uint16_t writeValues[], int writeNb, int readAddress, uint16_t readValues[], int readNb)
 {
+  return writeAndReadRegisters(0x00, writeAddress, writeValues, writeNb, readAddress, readValues, readNb);
+}
+
+int ModbusClient::writeAndReadRegisters(int id, int writeAddress, const uint16_t writeValues[], int writeNb, int readAddress, uint16_t readValues[], int readNb)
+{
+  modbus_set_slave(_mb, id);
+
   if (modbus_write_and_read_registers(_mb, writeAddress, writeNb, writeValues, readAddress, readNb, readValues) < 0) {
     return 0;
   }

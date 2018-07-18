@@ -53,32 +53,39 @@ void setup() {
 
   // you're connected now, so print out the status:
   printWifiStatus();
-
-  // start the Modbus RTU client
-  if (!modbusTCPClient.begin(server)) {
-    Serial.println("Failed to start Modbus TCP Client!");
-    while (1);
-  }
 }
 
 void loop() {
-  // write the value of 0x01, to the coil at address 0x00 
-  if (!modbusTCPClient.writeCoil(0x00, 0x01)) {
-    Serial.print("Failed to write coil! ");
-    Serial.println(modbusTCPClient.lastError());
+  if (!modbusTCPClient.connected()) {
+    // client not connected, start the Modbus TCP client
+    Serial.println("Attempting to connect to Modbus TCP server");
+    
+    if (!modbusTCPClient.begin(server, 8502)) {
+      Serial.println("Modbus TCP Client failed to connect!");
+    } else {
+      Serial.println("Modbus TCP Client connected");
+    }
+  } else {
+    // client connected
+
+    // write the value of 0x01, to the coil at address 0x00
+    if (!modbusTCPClient.writeCoil(0x00, 0x01)) {
+      Serial.print("Failed to write coil! ");
+      Serial.println(modbusTCPClient.lastError());
+    }
+
+    // wait for 1 second
+    delay(1000);
+
+    // write the value of 0x00, to the coil at address 0x00
+    if (!modbusTCPClient.writeCoil(0x00, 0x00)) {
+      Serial.print("Failed to write coil! ");
+      Serial.println(modbusTCPClient.lastError());
+    }
+
+    // wait for 1 second
+    delay(1000);
   }
-
-  // wait for 1 second
-  delay(1000);
-
-  // write the value of 0x00, to the coil at address 0x00 
-  if (!modbusTCPClient.writeCoil(0x00, 0x00)) {
-    Serial.print("Failed to write coil! ");
-    Serial.println(modbusTCPClient.lastError());
-  }
-
-  // wait for 1 second
-  delay(1000);
 }
 
 void printWifiStatus() {

@@ -58,7 +58,7 @@ void setup() {
   // start the server
   wifiServer.begin();
 
-  // start the Modbus TCP client
+  // start the Modbus TCP server
   if (!modbusTCPServer.begin()) {
     Serial.println("Failed to start Modbus TCP Server!");
     while (1);
@@ -97,7 +97,7 @@ void loop() {
 
 void updateLED() {
   // read the current value of the coil
-  int coilValue = ModbusRTUServer.readCoil(0x00);
+  int coilValue = modbusTCPServer.readCoil(0x00);
 
   if (coilValue) {
     // coil value set, turn LED on

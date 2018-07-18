@@ -41,9 +41,21 @@ public:
    * @param ip IP Address of the Modbus server
    * @param port TCP port number of Modbus server, defaults to 502
    *
-   * Return 1 on success, 0 on failure
+   * @return 1 on success, 0 on failure
    */
   int begin(IPAddress ip, uint16_t port = 502);
+
+  /**
+   * Query connection status.
+   *
+   * @return 1 if connected, 0 if not connected
+   */
+  int connected();
+
+  /**
+   * Disconnect the client.
+   */
+  void stop();
 
 private:
   Client* _client;

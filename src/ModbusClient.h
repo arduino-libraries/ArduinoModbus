@@ -233,10 +233,11 @@ protected:
   ModbusClient();
   virtual ~ModbusClient();
 
-  int begin(modbus_t* _mb);
+  int begin(modbus_t* _mb, int defaultId);
 
 private:
   modbus_t* _mb;
+  int _defaultId;
 };
 
 #endif

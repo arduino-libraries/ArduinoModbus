@@ -32,11 +32,11 @@ public:
   /**
    * Start the Modbus TCP server with the specified parameters
    *
-   * @param id (slave) id of the server, defaults to 0x00 (broadcast)
+   * @param id (slave) id of the server, defaults to 0xff (TCP)
    *
    * Return 1 on success, 0 on failure
    */
-  int begin(int id = 0x00);
+  int begin(int id = 0xff);
 
   /**
    * Accept client connection

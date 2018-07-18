@@ -38,7 +38,7 @@ int ModbusRTUClientClass::begin(unsigned long baudrate, uint16_t config)
 {
   modbus_t* mb = modbus_new_rtu(baudrate, config);
 
-  return ModbusClient::begin(mb);
+  return ModbusClient::begin(mb, 0x00);
 }
 
 ModbusRTUClientClass ModbusRTUClient;

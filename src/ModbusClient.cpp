@@ -23,12 +23,22 @@
 
 ModbusClient::ModbusClient() :
   _mb(NULL),
-  _defaultId(0x00)
+  _defaultId(0x00),
+  _transmissionBegun(false),
+  _values(NULL),
+  _available(0),
+  _read(0),
+  _availableForWrite(0),
+  _written(0)
 {
 }
 
 ModbusClient::~ModbusClient()
 {
+  if (_values != NULL) {
+    free(_values);
+  }
+
   if (_mb != NULL) {
     modbus_free(_mb);
   }
@@ -51,6 +61,12 @@ int ModbusClient::begin(modbus_t* mb, int defaultId)
     return 0;
   }
 
+  _transmissionBegun = false;
+  _available = 0;
+  _read = 0;
+  _availableForWrite = 0;
+  _written = 0;
+
   modbus_set_error_recovery(_mb, MODBUS_ERROR_RECOVERY_PROTOCOL);
 
   return 1;
@@ -58,6 +74,12 @@ int ModbusClient::begin(modbus_t* mb, int defaultId)
 
 void ModbusClient::end()
 {
+  if (_values != NULL) {
+    free(_values);
+
+    _values = NULL;
+  }
+
   if (_mb != NULL) {
     modbus_close(_mb);
     modbus_free(_mb);
@@ -66,140 +88,84 @@ void ModbusClient::end()
   }
 }
 
-int ModbusClient::readCoil(int address)
+int ModbusClient::coilRead(int address)
 {
-  return readCoil(_defaultId, address);
+  return coilRead(_defaultId, address);
 }
 
-int ModbusClient::readCoil(int id, int address)
-{
-  uint8_t value;
-
-  if (readCoils(id, address, &value, 1) < 0) {
-    return -1;
-  }
-
-  return value;
-}
-
-int ModbusClient::readCoils(int address, uint8_t values[], int nb)
-{
-  return readCoils(_defaultId, address, values, nb);
-}
-
-int ModbusClient::readCoils(int id, int address, uint8_t values[], int nb)
-{
-  modbus_set_slave(_mb, id);
-
-  if (modbus_read_bits(_mb, address, nb, values) < 0) {
-    return 0;
-  }
-
-  return 1;
-}
-
-int ModbusClient::readDiscreteInput(int address)
-{
-  return readDiscreteInput(_defaultId, address);
-}
-
-int ModbusClient::readDiscreteInput(int id, int address)
+int ModbusClient::coilRead(int id, int address)
 {
   uint8_t value;
 
-  if (!readDiscreteInputs(id, address, &value, 1)) {
+  modbus_set_slave(_mb, id);
+  
+  if (modbus_read_bits(_mb, address, 1, &value) < 0) {
     return -1;
   }
 
   return value;
 }
 
-int ModbusClient::readDiscreteInputs(int address, uint8_t values[], int nb)
+int ModbusClient::discreteInputRead(int address)
 {
-  return readDiscreteInputs(_defaultId, address, values, nb);
+  return discreteInputRead(_defaultId, address);
 }
 
-int ModbusClient::readDiscreteInputs(int id, int address, uint8_t values[], int nb)
+int ModbusClient::discreteInputRead(int id, int address)
 {
-  modbus_set_slave(_mb, id);
+  uint8_t value;
 
-  if (modbus_read_input_bits(_mb, address, nb, values) < 0) {
-    return 0;
+  modbus_set_slave(_mb, id);
+  
+  if (modbus_read_input_bits(_mb, address, 1, &value) < 0) {
+    return -1;
   }
 
-  return 1;
+  return value;
 }
 
-long ModbusClient::readHoldingRegister(int address)
+long ModbusClient::holdingRegisterRead(int address)
 {
-  return readHoldingRegister(_defaultId, address);
+  return holdingRegisterRead(_defaultId, address);
 }
 
-long ModbusClient::readHoldingRegister(int id, int address)
+long ModbusClient::holdingRegisterRead(int id, int address)
 {
   uint16_t value;
 
-  if (!readHoldingRegisters(id, address, &value, 1)) {
+  modbus_set_slave(_mb, id);
+  
+  if (modbus_read_registers(_mb, address, 1, &value) < 0) {
     return -1;
   }
 
   return value;
 }
 
-int ModbusClient::readHoldingRegisters(int address, uint16_t values[], int nb)
+long ModbusClient::inputRegisterRead(int address)
 {
-  return readHoldingRegisters(_defaultId, address, values, nb);
+  return inputRegisterRead(_defaultId, address);
 }
 
-int ModbusClient::readHoldingRegisters(int id, int address, uint16_t values[], int nb)
-{
-  modbus_set_slave(_mb, id);
-
-  if (modbus_read_registers(_mb, address, nb, values) < 0) {
-    return 0;
-  }
-
-  return 1;
-}
-
-long ModbusClient::readInputRegister(int address)
-{
-  return readInputRegister(_defaultId, address);
-}
-
-long ModbusClient::readInputRegister(int id, int address)
+long ModbusClient::inputRegisterRead(int id, int address)
 {
   uint16_t value;
 
-  if (!readInputRegisters(id, address, &value, 1)) {
+  modbus_set_slave(_mb, id);
+  
+  if (modbus_read_input_registers(_mb, address, 1, &value) < 0) {
     return -1;
   }
 
   return value;
 }
 
-int ModbusClient::readInputRegisters(int address, uint16_t values[], int nb)
+int ModbusClient::coilWrite(int address, uint8_t value)
 {
-  return readInputRegisters(_defaultId, address, values, nb);
+  return coilWrite(_defaultId, address, value);
 }
 
-int ModbusClient::readInputRegisters(int id, int address, uint16_t values[], int nb)
-{
-  modbus_set_slave(_mb, id);
-
-  if (modbus_read_input_registers(_mb, address, nb, values) < 0) {
-    return 0;
-  }
-
-  return 1;
-}
-
-int ModbusClient::writeCoil(int address, uint8_t value)
-{
-  return writeCoil(_defaultId, address, value);
-}
-
-int ModbusClient::writeCoil(int id, int address, uint8_t value)
+int ModbusClient::coilWrite(int id, int address, uint8_t value)
 {
   modbus_set_slave(_mb, id);
 
@@ -210,28 +176,12 @@ int ModbusClient::writeCoil(int id, int address, uint8_t value)
   return 1;
 }
 
-int ModbusClient::writeCoils(int address, const uint8_t values[], int nb)
+int ModbusClient::holdingRegisterWrite(int address, uint16_t value)
 {
-  return writeCoils(_defaultId, address, values, nb);
+  return holdingRegisterWrite(_defaultId, address, value);
 }
 
-int ModbusClient::writeCoils(int id, int address, const uint8_t values[], int nb)
-{
-  modbus_set_slave(_mb, id);
-
-  if (modbus_write_bits(_mb, address, nb, values) < 0) {
-    return 0;
-  }
-
-  return 1;
-}
-
-int ModbusClient::writeHoldingRegister(int address, uint16_t value)
-{
-  return writeHoldingRegister(_defaultId, address, value);
-}
-
-int ModbusClient::writeHoldingRegister(int id, int address, uint16_t value)
+int ModbusClient::holdingRegisterWrite(int id, int address, uint16_t value)
 {
   modbus_set_slave(_mb, id);
 
@@ -242,28 +192,12 @@ int ModbusClient::writeHoldingRegister(int id, int address, uint16_t value)
   return 1;
 }
 
-int ModbusClient::writeHoldingRegisters(int address, const uint16_t values[], int nb)
+int ModbusClient::registerMaskWrite(int address, uint16_t andMask, uint16_t orMask)
 {
-  return writeHoldingRegisters(_defaultId, address, values, nb);
+  return registerMaskWrite(_defaultId, address, andMask, orMask);
 }
 
-int ModbusClient::writeHoldingRegisters(int id, int address, const uint16_t values[], int nb)
-{
-  modbus_set_slave(_mb, id);
-
-  if (modbus_write_registers(_mb, address, nb, values) < 0) {
-    return 0;
-  }
-
-  return 1;
-}
-
-int ModbusClient::maskWriteRegister(int address, uint16_t andMask, uint16_t orMask)
-{
-  return maskWriteRegister(_defaultId, address, andMask, orMask);
-}
-
-int ModbusClient::maskWriteRegister(int id, int address, uint16_t andMask, uint16_t orMask)
+int ModbusClient::registerMaskWrite(int id, int address, uint16_t andMask, uint16_t orMask)
 {
   modbus_set_slave(_mb, id);
 
@@ -274,20 +208,198 @@ int ModbusClient::maskWriteRegister(int id, int address, uint16_t andMask, uint1
   return 1;
 }
 
-int ModbusClient::writeAndReadRegisters(int writeAddress, const uint16_t writeValues[], int writeNb, int readAddress, uint16_t readValues[], int readNb)
+int ModbusClient::beginTransmission(int type, int address, int nb)
 {
-  return writeAndReadRegisters(_defaultId, writeAddress, writeValues, writeNb, readAddress, readValues, readNb);
+  return beginTransmission(_defaultId, type, address, nb);
 }
 
-int ModbusClient::writeAndReadRegisters(int id, int writeAddress, const uint16_t writeValues[], int writeNb, int readAddress, uint16_t readValues[], int readNb)
+int ModbusClient::beginTransmission(int id, int type, int address, int nb)
 {
-  modbus_set_slave(_mb, id);
+  if ((type != COILS && type != HOLDING_REGISTERS) || nb < 1) {
+    errno = EINVAL;
 
-  if (modbus_write_and_read_registers(_mb, writeAddress, writeNb, writeValues, readAddress, readNb, readValues) < 0) {
     return 0;
   }
 
+  int valueSize = (type == COILS) ? sizeof(uint8_t) : sizeof(uint16_t);
+
+  _values = realloc(_values, nb * valueSize);
+
+  if (_values == NULL) {
+    errno = ENOMEM;
+
+    return 0;
+  }
+
+  memset(_values, 0x00, nb * valueSize);
+
+  _transmissionBegun = true;
+  _id = id;
+  _type = type;
+  _address = address;
+  _nb = nb;
+
+  _available = 0;
+  _read = 0;
+  _availableForWrite = nb;
+  _written = 0;
+
   return 1;
+}
+
+int ModbusClient::write(unsigned int value)
+{
+  if (!_transmissionBegun || _availableForWrite <= 0) {
+    return 0;
+  }
+
+  switch (_type) {
+    case COILS:
+      ((uint8_t*)_values)[_written++] = value;
+      _availableForWrite--;
+      return 1;
+
+    case HOLDING_REGISTERS:
+      ((uint16_t*)_values)[_written++] = value;
+      _availableForWrite--;
+      return 1;
+
+    default:
+      return 0;
+  }
+
+  return 1;
+}
+
+int ModbusClient::endTransmission()
+{
+  if (!_transmissionBegun) {
+    return 0;
+  }
+
+  int result = -1;
+
+  modbus_set_slave(_mb, _id);
+
+  switch (_type) {
+    case COILS:
+      result = modbus_write_bits(_mb, _address, _nb, (const uint8_t*)_values);
+      break;
+
+    case HOLDING_REGISTERS:
+      result = modbus_write_registers(_mb, _address, _nb, (const uint16_t*)_values);
+      break;
+
+    default:
+      return 0;
+  }
+
+  _transmissionBegun = false;
+  _available = 0;
+  _read = 0;
+  _availableForWrite = 0;
+  _written = 0;
+
+  return (result < 0) ? 0 : 1;
+}
+
+int ModbusClient::requestFrom(int type, int address, int nb)
+{
+  return requestFrom(_defaultId, type, address, nb);
+}
+
+int ModbusClient::requestFrom(int id, int type, int address, int nb)
+{
+  if ((type != COILS && type != DISCRETE_INPUTS && type != HOLDING_REGISTERS && type != INPUT_REGISTERS) 
+      || (nb < 1)) {
+    errno = EINVAL;
+
+    return 0;
+  }
+
+  int valueSize = (type == COILS || type == DISCRETE_INPUTS) ? sizeof(uint8_t) : sizeof(uint16_t);
+
+  _values = realloc(_values, nb * valueSize);
+
+  if (_values == NULL) {
+    errno = ENOMEM;
+
+    return 0;
+  }
+
+  int result = -1;
+
+  modbus_set_slave(_mb, id);
+
+  switch (type) {
+    case COILS:
+      result = modbus_read_bits(_mb, address, nb, (uint8_t*)_values);
+      break;
+
+    case DISCRETE_INPUTS:
+      result = modbus_read_input_bits(_mb, address, nb, (uint8_t*)_values);
+      break;
+
+    case HOLDING_REGISTERS:
+      result = modbus_read_registers(_mb, address, nb, (uint16_t*)_values);
+      break;
+
+    case INPUT_REGISTERS:
+      result = modbus_read_input_registers(_mb, address, nb, (uint16_t*)_values);
+      break;
+
+    default:
+      break; 
+  }
+
+  if (result == -1) {
+    return 0;
+  }
+
+  _transmissionBegun = false;
+  _type = type;
+  _available = nb;
+  _read = 0;
+  _availableForWrite = 0;
+  _written = 0;
+
+  return nb;
+}
+
+int ModbusClient::available()
+{
+  return _available;
+}
+
+long ModbusClient::read()
+{
+  if (_available <= 0) {
+    return -1;
+  }
+
+  long result = -1;
+
+  switch (_type) {
+    case COILS:
+    case DISCRETE_INPUTS:
+      result = ((uint8_t*)_values)[_read];
+      break;
+
+    case HOLDING_REGISTERS:
+    case INPUT_REGISTERS:
+      result = ((uint16_t*)_values)[_read];
+      break;
+
+    default:
+      break; 
+  }
+
+  if (result != -1) {
+    _available--;
+    _read++;
+  }
+
+  return result;
 }
 
 const char* ModbusClient::lastError()

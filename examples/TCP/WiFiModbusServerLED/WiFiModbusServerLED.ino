@@ -97,7 +97,7 @@ void loop() {
 
 void updateLED() {
   // read the current value of the coil
-  int coilValue = modbusTCPServer.readCoil(0x00);
+  int coilValue = modbusTCPServer.coilRead(0x00);
 
   if (coilValue) {
     // coil value set, turn LED on

@@ -26,6 +26,11 @@ extern "C" {
 
 #include <Arduino.h>
 
+#define COILS             0
+#define DISCRETE_INPUTS   1
+#define HOLDING_REGISTERS 2
+#define INPUT_REGISTERS   3
+
 class ModbusClient {
 
 public:
@@ -38,22 +43,8 @@ public:
    *
    * @return coil value on success, -1 on failure.
    */
-  int readCoil(int address);
-  int readCoil(int id, int address);
-
-  /**
-   * Perform a "Read Coils" operation for the specified address and number of
-   * coils.
-   *
-   * @param id (slave) id of target, defaults to 0x00 if not specified
-   * @param address start address to use for operation
-   * @param values array of bytes to store coil values
-   * @param nb number of coils to read
-   *
-   * @return 1 success, 0 on failure.
-   */
-  int readCoils(int address, uint8_t values[], int nb);
-  int readCoils(int id, int address, uint8_t values[], int nb);
+  int coilRead(int address);
+  int coilRead(int id, int address);
 
   /**
    * Perform a "Read Discrete Inputs" operation for the specified address for a
@@ -64,22 +55,8 @@ public:
    *
    * @return discrete input value on success, -1 on failure.
    */
-  int readDiscreteInput(int address);
-  int readDiscreteInput(int id, int address);
-
-  /**
-   * Perform a "Read Discrete Inputs" operation for the specified address and 
-   * number of inputs.
-   *
-   * @param id (slave) id of target, defaults to 0x00 if not specified
-   * @param address start address to use for operation
-   * @param values array of bytes to store discrete input values
-   * @param nb number of discrete inputs to read
-   *
-   * @return 1 success, 0 on failure.
-   */
-  int readDiscreteInputs(int address, uint8_t values[], int nb);
-  int readDiscreteInputs(int id, int address, uint8_t values[], int nb);
+  int discreteInputRead(int address);
+  int discreteInputRead(int id, int address);
 
   /**
    * Perform a "Read Holding Registers" operation for a single holding
@@ -90,22 +67,8 @@ public:
    *
    * @return holiding register value on success, -1 on failure.
    */
-  long readHoldingRegister(int address);
-  long readHoldingRegister(int id, int address);
-
-  /**
-   * Perform a "Read Holding Registers" operation for the specified address and
-   * number of holding registers.
-   *
-   * @param id (slave) id of target, defaults to 0x00 if not specified
-   * @param address start address to use for operation
-   * @param values array of words to store holding register values
-   * @param nb number of holding registers to read
-   *
-   * @return 1 success, 0 on failure.
-   */
-  int readHoldingRegisters(int address, uint16_t values[], int nb);
-  int readHoldingRegisters(int id, int address, uint16_t values[], int nb);
+  long holdingRegisterRead(int address);
+  long holdingRegisterRead(int id, int address);
 
   /**
    * Perform a "Read Input Registers" operation for a single input
@@ -116,22 +79,8 @@ public:
    *
    * @return input register value on success, -1 on failure.
    */
-  long readInputRegister(int address);
-  long readInputRegister(int id, int address);
-
-  /**
-   * Perform a "Read Input Registers" operation for the specified address and
-   * number of input registers.
-   *
-   * @param id (slave) id of target, defaults to 0x00 if not specified
-   * @param address start address to use for operation
-   * @param values array of words to store input register values
-   * @param nb number of holding input to read
-   *
-   * @return 1 success, 0 on failure.
-   */
-  int readInputRegisters(int address, uint16_t values[], int nb);
-  int readInputRegisters(int id, int address, uint16_t values[], int nb);
+  long inputRegisterRead(int address);
+  long inputRegisterRead(int id, int address);
 
   /**
    * Perform a "Write Single Coil" operation for the specified address and
@@ -143,22 +92,8 @@ public:
    *
    * @return 1 on success, 0 on failure.
    */
-  int writeCoil(int address, uint8_t value);
-  int writeCoil(int id, int address, uint8_t value);
-
-  /**
-   * Perform a "Write Multiple Coils" operation for the specified address and
-   * values.
-   *
-   * @param id (slave) id of target, defaults to 0x00 if not specified
-   * @param address start address to use for operation
-   * @param values array of coil values to write
-   * @param nb number of coil values to write
-   *
-   * @return 1 on success, 0 on failure.
-   */
-  int writeCoils(int address, const uint8_t values[], int nb);
-  int writeCoils(int id, int address, const uint8_t values[], int nb);
+  int coilWrite(int address, uint8_t value);
+  int coilWrite(int id, int address, uint8_t value);
 
   /**
    * Perform a "Write Single Holding Register" operation for the specified
@@ -170,22 +105,8 @@ public:
    *
    * @return 1 on success, 0 on failure.
    */
-  int writeHoldingRegister(int address, uint16_t value);
-  int writeHoldingRegister(int id, int address, uint16_t value);
-
-  /**
-   * Perform a "Write Multiple Holding Registers" operation for the specified
-   * address and values.
-   *
-   * @param id (slave) id of target, defaults to 0x00 if not specified
-   * @param address start address to use for operation
-   * @param values array of holding register values to write
-   * @param nb number of holding register values to write
-   *
-   * @return 1 on success, 0 on failure.
-   */
-  int writeHoldingRegisters(int address, const uint16_t values[], int nb);
-  int writeHoldingRegisters(int id, int address, const uint16_t values[], int nb);
+  int holdingRegisterWrite(int address, uint16_t value);
+  int holdingRegisterWrite(int id, int address, uint16_t value);
 
   /**
    * Perform a "Mask Write Registers" operation for the specified
@@ -198,24 +119,72 @@ public:
    *
    * @return 1 on success, 0 on failure.
    */
-  int maskWriteRegister(int address, uint16_t andMask, uint16_t orMask);
-  int maskWriteRegister(int id, int address, uint16_t andMask, uint16_t orMask);
+  int registerMaskWrite(int address, uint16_t andMask, uint16_t orMask);
+  int registerMaskWrite(int id, int address, uint16_t andMask, uint16_t orMask);
 
   /**
-   * Perform a "Read/Write Registers" operation.
+   * Begin the process of a writing multiple coils or holding registers.
+   *
+   * Use write(value) to set the values you want to send, and endTransmission()
+   * to send request on the wire.
    *
    * @param id (slave) id of target, defaults to 0x00 if not specified
-   * @param writeAddress write address to use for operation
-   * @param writeValues array of words to write
-   * @param writeNb number of registers to write
-   * @param readAddress read address to use for operation
-   * @param readValues array of words to store register values
-   * @param readNb number of registers to read
+   * @param type type of write to perform, either COILS or HOLD_REGISTERS
+   * @param address start address to use for operation
+   * @param nb number of values to write
    *
-   * @return 1 on success, 0 on failure.
+   * @return 1 on success, 0 on failure
    */
-  int writeAndReadRegisters(int writeAddress, const uint16_t writeValues[], int writeNb, int readAddress, uint16_t readValues[], int readNb);
-  int writeAndReadRegisters(int id, int writeAddress, const uint16_t writeValues[], int writeNb, int readAddress, uint16_t readValues[], int readNb);
+  int beginTransmission(int type, int address, int nb);
+  int beginTransmission(int id, int type, int address, int nb);
+
+  /**
+   * Set the values of a write operation started by beginTransmission(...).
+   *
+   * @param value value to write
+   *
+   * @return 1 on success, 0 on failure
+   */
+  int write(unsigned int value);
+
+  /**
+   * End the process of a writing multiple coils or holding registers.
+   *
+   * @return 1 on success, 0 on failure
+   */
+  int endTransmission();
+
+  /**
+   * Read multiple coils, discrete inputs, holding registers, or input 
+   * register values.
+   *
+   * Use available() and read() to process the read values.
+   *
+   * @param id (slave) id of target, defaults to 0x00 if not specified
+   * @param type type of read to perform, either COILS, DISCRETE_INPUTS, 
+   *             HOLD_REGISTERS, or INPUT_REGISTERS
+   * @param address start address to use for operation
+   * @param nb number of values to read
+   *
+   * @return 0 on failure, number of values read on success
+   */
+  int requestFrom(int type, int address, int nb);
+  int requestFrom(int id, int type, int address,int nb);
+
+  /**
+   * Query the number of values available to read after calling
+   * requestFrom(...)
+   *
+   * @return number of values available for reading use read()
+   */
+  int available();
+
+  /**
+   * Read a value after calling requestFrom(...)
+   *
+   * @return -1 on failure, value on success
+   */
+  long read();
 
   /**
    * Read the last error reason as a string
@@ -238,6 +207,18 @@ protected:
 private:
   modbus_t* _mb;
   int _defaultId;
+
+  bool _transmissionBegun;
+  int _id;
+  int _type;
+  int _address;
+  int _nb;
+
+  void* _values;
+  int _available;
+  int _read;
+  int _availableForWrite;
+  int _written;
 };
 
 #endif

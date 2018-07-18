@@ -36,7 +36,7 @@ void setup() {
 
 void loop() {
   // for (slave) id 1: write the value of 0x01, to the coil at address 0x00 
-  if (!ModbusRTUClient.writeCoil(1, 0x00, 0x01)) {
+  if (!ModbusRTUClient.coilWrite(1, 0x00, 0x01)) {
     Serial.print("Failed to write coil! ");
     Serial.println(ModbusRTUClient.lastError());
   }
@@ -45,7 +45,7 @@ void loop() {
   delay(1000);
 
   // for (slave) id 1: write the value of 0x00, to the coil at address 0x00 
-  if (!ModbusRTUClient.writeCoil(1, 0x00, 0x00)) {
+  if (!ModbusRTUClient.coilWrite(1, 0x00, 0x00)) {
     Serial.print("Failed to write coil! ");
     Serial.println(ModbusRTUClient.lastError());
   }

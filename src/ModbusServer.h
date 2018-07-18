@@ -70,20 +70,13 @@ public:
   int configureInputRegisters(int startAddress, int nb);
 
   // same as ModbusClient.h
-  int readCoil(int address);
-  int readCoils(int address, uint8_t values[], int nb);
-  int readDiscreteInput(int address);
-  int readDiscreteInputs(int address, uint8_t values[], int nb);
-  long readHoldingRegister(int address);
-  int readHoldingRegisters(int address, uint16_t values[], int nb);
-  long readInputRegister(int address);
-  int readInputRegisters(int address, uint16_t values[], int nb);
-  int writeCoil(int address, uint8_t value);
-  int writeCoils(int address, const uint8_t values[], int nb);
-  int writeHoldingRegister(int address, uint16_t value);
-  int writeHoldingRegisters(int address, const uint16_t values[], int nb);
-  int maskWriteRegister(int address, uint16_t andMask, uint16_t orMask);
-  int writeAndReadRegisters(int writeAddress, const uint16_t writeValues[], int writeNb, int readAddress, uint16_t readValues[], int readNb);
+  int coilRead(int address);
+  int discreteInputRead(int address);
+  long holdingRegisterRead(int address);
+  long inputRegisterRead(int address);
+  int coilWrite(int address, uint8_t value);
+  int holdingRegisterWrite(int address, uint16_t value);
+  int registerMaskWrite(int address, uint16_t andMask, uint16_t orMask);
 
   /**
    * Write the value of the server's Discrete Input for the specified address
@@ -94,7 +87,7 @@ public:
    *
    * @return 1 on success, 0 on failure.
    */
-  int writeDiscreteInput(int address, uint8_t value);
+  int discreteInputWrite(int address, uint8_t value);
 
   /**
    * Write values to the server's Discrete Inputs for the specified address
@@ -117,7 +110,7 @@ public:
    *
    * @return 1 on success, 0 on failure.
    */
-  int writeInputRegister(int address, uint16_t value);
+  int inputRegisterWrite(int address, uint16_t value);
 
   /**
    * Write values to the server's Input Registers for the specified address

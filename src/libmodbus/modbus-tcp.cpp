@@ -833,10 +833,10 @@ static int _modbus_tcp_select(modbus_t *ctx, fd_set *rset, struct timeval *tv, i
     do {
         s_rc = ctx_tcp->client->available();
 
-        if (s_rc == length_to_read) {
+        if (s_rc >= length_to_read) {
             break;
         }
-    } while ((millis() - start) < wait_time_millis);
+    } while ((millis() - start) < wait_time_millis && ctx_tcp->client->connected());
 #else
     while ((s_rc = select(ctx->s+1, rset, NULL, NULL, tv)) == -1) {
         if (errno == EINTR) {

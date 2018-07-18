@@ -1263,7 +1263,7 @@ static int _modbus_rtu_select(modbus_t *ctx, fd_set *rset,
     do {
         s_rc = RS485.available();
 
-        if (s_rc == length_to_read) {
+        if (s_rc >= length_to_read) {
             break;
         }
     } while ((millis() - start) < wait_time_millis);

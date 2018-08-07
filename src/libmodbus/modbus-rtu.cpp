@@ -327,9 +327,11 @@ static ssize_t _modbus_rtu_send(modbus_t *ctx, const uint8_t *req, int req_lengt
 
     ssize_t size;
 
+    RS485.noReceive();
     RS485.beginTransmission();
     size = RS485.write(req, req_length);
     RS485.endTransmission();
+    RS485.receive();
 
     return size;
 #else

@@ -7,7 +7,8 @@
 
   Circuit:
    - MKR board
-   - Modbus RS485 Temperature:
+   - Winners® Modbus RS485 Temperature and Humidity:
+     https://www.banggood.com/Modbus-RS485-Temperature-and-Humidity-Transmitter-Sensor-High-Precision-Monitoring-p-1159961.html?cur_warehouse=CN
    - External power Supply
    - MKR 485 shield
      - ISO GND connected to GND of the Modbus RTU sensor and the Power supply V-;

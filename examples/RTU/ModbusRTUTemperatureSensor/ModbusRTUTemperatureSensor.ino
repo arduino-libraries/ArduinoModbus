@@ -48,14 +48,14 @@ void loop() {
     Serial.println(ModbusRTUClient.lastError());
   } else {
 
-    // If the request goes fine, the sensor sent the readings as bytes packet,
-    // through the read() function is possible read the measurments.
-    // the readings is parsed as a short integer from the packets
+    // If the request goes fine, the sensor sends the readings, this are 
+    // stored in the holding register and through the read() function is 
+    // possible get the temperature and the humidity as raw values.
     short rawtemperature = ModbusRTUClient.read();
     short rawhumidity = ModbusRTUClient.read();
 
-    // Is required divide by 10.0 the value readed, because the sensor sent the
-    // readings as an integer obtained multipling the float value readed by 10
+    // Is required divide by 10.0 the raw value to get the temperature in Celsius
+    // and the humidity reading as a percentage.
     temperature = rawtemperature / 10.0;
     humidity = rawhumidity / 10.0;
     Serial.println(temperature);

@@ -11,8 +11,9 @@
      https://www.banggood.com/Modbus-RS485-Temperature-and-Humidity-Transmitter-Sensor-High-Precision-Monitoring-p-1159961.html?cur_warehouse=CN
    - External power Supply
    - MKR 485 shield
-     - ISO GND connected to GND of the Modbus RTU sensor and the Power supply V-;
+     - ISO GND connected to GND of the Modbus RTU sensor and the Power supply V-
      - Power supply V+ connected to V+ sensor
+     - Set the Power supply's voltage to 9 V and the Power supply's current to 1 A
      - Y connected to A/Y of the Modbus RTU sensor
      - Z connected to B/Z of the Modbus RTU sensor
      - Jumper positions
@@ -48,14 +49,14 @@ void loop() {
     Serial.println(ModbusRTUClient.lastError());
   } else {
 
-    // If the request goes fine, the sensor sends the readings, this are 
-    // stored in the holding register and through the read() function is 
+    // If the request goes fine, the sensor sends the readings, that are
+    // stored in the holding register and through the read() function it is
     // possible get the temperature and the humidity as raw values.
     short rawtemperature = ModbusRTUClient.read();
     short rawhumidity = ModbusRTUClient.read();
 
-    // Is required divide by 10.0 the raw value to get the temperature in Celsius
-    // and the humidity reading as a percentage.
+    // To get the temperature in Celsius and the humidity reading as
+    // a percentage, divide the raw value by 10.0.
     temperature = rawtemperature / 10.0;
     humidity = rawhumidity / 10.0;
     Serial.println(temperature);

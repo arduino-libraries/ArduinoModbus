@@ -9,13 +9,10 @@
    - MKR board
    - Winners® Modbus RS485 Temperature and Humidity:
      https://www.banggood.com/Modbus-RS485-Temperature-and-Humidity-Transmitter-Sensor-High-Precision-Monitoring-p-1159961.html?cur_warehouse=CN
-   - External power Supply
+   - External 9-36 V power Supply
    - MKR 485 shield
      - ISO GND connected to GND of the Modbus RTU sensor and the Power supply V-
      - Power supply V+ connected to V+ sensor
-     - The Working voltage range of the sensor, from product page, is 9-36 V
-       - Set the Power supply's voltage to a value between 9 - 36 V
-       - Set the Power supply's current limit to 1 A
      - Y connected to A/Y of the Modbus RTU sensor
      - Z connected to B/Z of the Modbus RTU sensor
      - Jumper positions
@@ -50,10 +47,9 @@ void loop() {
     Serial.print("failed to read registers! ");
     Serial.println(ModbusRTUClient.lastError());
   } else {
-
-    // If the request goes fine, the sensor sends the readings, that are
-    // stored in the holding register and through the read() function it is
-    // possible get the temperature and the humidity as raw values.
+    // If the request succeeds, the sensor sends the readings, that are
+    // stored in the holding registers. The read() method can be used to
+    // get the raw temperature and the humidity values.
     short rawtemperature = ModbusRTUClient.read();
     short rawhumidity = ModbusRTUClient.read();
 

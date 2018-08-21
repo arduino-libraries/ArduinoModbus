@@ -13,7 +13,9 @@
    - MKR 485 shield
      - ISO GND connected to GND of the Modbus RTU sensor and the Power supply V-
      - Power supply V+ connected to V+ sensor
-     - Set the Power supply's voltage to 9 V and the Power supply's current to 1 A
+     - The Working voltage range of the sensor, from product page, is 9-36 V
+       - Set the Power supply's voltage to a value between 9 - 36 V
+       - Set the Power supply's current limit to 1 A
      - Y connected to A/Y of the Modbus RTU sensor
      - Z connected to B/Z of the Modbus RTU sensor
      - Jumper positions

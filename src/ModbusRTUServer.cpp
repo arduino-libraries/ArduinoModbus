@@ -34,9 +34,9 @@ ModbusRTUServerClass::~ModbusRTUServerClass()
 {
 }
 
-int ModbusRTUServerClass::begin(int id, unsigned long baudrate, uint16_t config)
+int ModbusRTUServerClass::begin(int id, unsigned long baudrate, uint16_t config, RS485Class& rs485)
 {
-  modbus_t* mb = modbus_new_rtu(baudrate, config);
+  modbus_t* mb = modbus_new_rtu(baudrate, config, &rs485);
 
   if (!ModbusServer::begin(mb, id)) {
     return 0;
@@ -45,6 +45,11 @@ int ModbusRTUServerClass::begin(int id, unsigned long baudrate, uint16_t config)
   modbus_connect(mb);
 
   return 1;
+}
+
+int ModbusRTUServerClass::begin(int id, unsigned long baudrate, RS485Class& rs485)
+{
+  return begin(id, baudrate, SERIAL_8N1, RS485);
 }
 
 void ModbusRTUServerClass::poll()

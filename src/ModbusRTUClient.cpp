@@ -34,9 +34,9 @@ ModbusRTUClientClass::~ModbusRTUClientClass()
 {
 }
 
-int ModbusRTUClientClass::begin(unsigned long baudrate, uint16_t config)
+int ModbusRTUClientClass::begin(unsigned long baudrate, uint16_t config, RS485Class& rs485)
 {
-  modbus_t* mb = modbus_new_rtu(baudrate, config);
+  modbus_t* mb = modbus_new_rtu(baudrate, config, &rs485);
 
   if (!ModbusClient::begin(mb, 0x00)) {
     return 0;
@@ -45,6 +45,11 @@ int ModbusRTUClientClass::begin(unsigned long baudrate, uint16_t config)
   modbus_set_response_timeout(mb, 1, 0);
 
   return 1;
+}
+
+int ModbusRTUClientClass::begin(unsigned long baudrate, RS485Class& rs485)
+{
+  return begin(baudrate, SERIAL_8N1, rs485);
 }
 
 ModbusRTUClientClass ModbusRTUClient;

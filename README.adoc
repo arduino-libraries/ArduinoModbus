@@ -1,3 +1,6 @@
+[caption="Build Status",link=https://travis-ci.com/arduino-libraries/ArduinoModbus]
+image::https://travis-ci.com/arduino-libraries/ArduinoModbus.svg?branch=master[Build Status]
+
 = Modbus Library for Arduino =
 
 Use http://www.modbus.org/[Modbus] with your Arduino. 

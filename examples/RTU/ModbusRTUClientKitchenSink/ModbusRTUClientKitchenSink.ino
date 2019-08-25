@@ -1,7 +1,7 @@
 /*
   Modbus RTU Client Kitchen Sink
 
-  This sketch creates a Modbus RTU Client and demostrates
+  This sketch creates a Modbus RTU Client and demonstrates
   how to use various Modbus Client APIs.
 
   Circuit:

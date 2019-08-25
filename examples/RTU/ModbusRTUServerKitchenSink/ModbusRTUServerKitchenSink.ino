@@ -1,7 +1,7 @@
 /*
   Modbus RTU Server Kitchen Sink
 
-  This sketch creates a Modbus RTU Server and demostrates
+  This sketch creates a Modbus RTU Server and demonstrates
   how to use various Modbus Server APIs.
 
   Circuit:

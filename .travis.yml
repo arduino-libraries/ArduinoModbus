@@ -30,32 +30,32 @@ matrix:
     - env: BOARD=uno PLATFORMIO_CI_SRC=examples/RTU/ModbusRTUServerKitchenSink
     - env: BOARD=uno PLATFORMIO_CI_SRC=examples/RTU/ModbusRTUServerLED
     - env: BOARD=uno PLATFORMIO_CI_SRC=examples/RTU/ModbusRTUTemperatureSensor
-    - env: BOARD=uno PLATFORMIO_CI_SRC=examples/TCP/WiFiModbusClientToggle
-    - env: BOARD=uno PLATFORMIO_CI_SRC=examples/TCP/WiFiModbusServerLED
 
     - env: BOARD=diecimilaatmega328 PLATFORMIO_CI_SRC=examples/RTU/ModbusRTUClientKitchenSink
     - env: BOARD=diecimilaatmega328 PLATFORMIO_CI_SRC=examples/RTU/ModbusRTUClientToggle
     - env: BOARD=diecimilaatmega328 PLATFORMIO_CI_SRC=examples/RTU/ModbusRTUServerKitchenSink
     - env: BOARD=diecimilaatmega328 PLATFORMIO_CI_SRC=examples/RTU/ModbusRTUServerLED
     - env: BOARD=diecimilaatmega328 PLATFORMIO_CI_SRC=examples/RTU/ModbusRTUTemperatureSensor
-    - env: BOARD=diecimilaatmega328 PLATFORMIO_CI_SRC=examples/TCP/WiFiModbusClientToggle
-    - env: BOARD=diecimilaatmega328 PLATFORMIO_CI_SRC=examples/TCP/WiFiModbusServerLED
 
     - env: BOARD=pro16MHzatmega328 PLATFORMIO_CI_SRC=examples/RTU/ModbusRTUClientKitchenSink
     - env: BOARD=pro16MHzatmega328 PLATFORMIO_CI_SRC=examples/RTU/ModbusRTUClientToggle
     - env: BOARD=pro16MHzatmega328 PLATFORMIO_CI_SRC=examples/RTU/ModbusRTUServerKitchenSink
     - env: BOARD=pro16MHzatmega328 PLATFORMIO_CI_SRC=examples/RTU/ModbusRTUServerLED
     - env: BOARD=pro16MHzatmega328 PLATFORMIO_CI_SRC=examples/RTU/ModbusRTUTemperatureSensor
-    - env: BOARD=pro16MHzatmega328 PLATFORMIO_CI_SRC=examples/TCP/WiFiModbusClientToggle
-    - env: BOARD=pro16MHzatmega328 PLATFORMIO_CI_SRC=examples/TCP/WiFiModbusServerLED
 
     - env: BOARD=due PLATFORMIO_CI_SRC=examples/RTU/ModbusRTUClientKitchenSink
     - env: BOARD=due PLATFORMIO_CI_SRC=examples/RTU/ModbusRTUClientToggle
     - env: BOARD=due PLATFORMIO_CI_SRC=examples/RTU/ModbusRTUServerKitchenSink
     - env: BOARD=due PLATFORMIO_CI_SRC=examples/RTU/ModbusRTUServerLED
     - env: BOARD=due PLATFORMIO_CI_SRC=examples/RTU/ModbusRTUTemperatureSensor
-    - env: BOARD=due PLATFORMIO_CI_SRC=examples/TCP/WiFiModbusClientToggle
-    - env: BOARD=due PLATFORMIO_CI_SRC=examples/TCP/WiFiModbusServerLED
+
+    - env: BOARD=mkrwifi1010 PLATFORMIO_CI_SRC=examples/RTU/ModbusRTUClientKitchenSink
+    - env: BOARD=mkrwifi1010 PLATFORMIO_CI_SRC=examples/RTU/ModbusRTUClientToggle
+    - env: BOARD=mkrwifi1010 PLATFORMIO_CI_SRC=examples/RTU/ModbusRTUServerKitchenSink
+    - env: BOARD=mkrwifi1010 PLATFORMIO_CI_SRC=examples/RTU/ModbusRTUServerLED
+    - env: BOARD=mkrwifi1010 PLATFORMIO_CI_SRC=examples/RTU/ModbusRTUTemperatureSensor
+    - env: BOARD=mkrwifi1010 PLATFORMIO_CI_SRC=examples/TCP/WiFiModbusClientToggle
+    - env: BOARD=mkrwifi1010 PLATFORMIO_CI_SRC=examples/TCP/WiFiModbusServerLED
 
     - os: linux
       dist: trusty

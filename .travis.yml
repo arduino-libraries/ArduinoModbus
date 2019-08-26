@@ -94,6 +94,7 @@ before_install:
 install:
   - if [ -z "$TASK" ]; then pip install --upgrade platformio; fi
   - if [ -z "$TASK" ]; then platformio lib install "ArduinoRS485"; fi
+  - if [ -z "$TASK" -a "$BOARD" == "mkrwifi1010" ]; then platformio lib install "WiFiNINA"; fi
   - if [ "$TASK" = "codespell" ]; then pip install --upgrade git+https://github.com/codespell-project/codespell.git; fi
 
 script:

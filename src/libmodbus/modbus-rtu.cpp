@@ -923,7 +923,7 @@ static int _modbus_rtu_connect(modbus_t *ctx)
        ONCLR ant others needs OPOST to be enabled
     */
 
-    /* Raw output */
+    /* Raw ouput */
     tios.c_oflag &=~ OPOST;
 
     /* C_CC         Control characters

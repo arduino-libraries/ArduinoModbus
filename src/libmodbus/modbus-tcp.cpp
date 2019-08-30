@@ -184,7 +184,7 @@ static int _modbus_tcp_prepare_response_tid(const uint8_t *req, int *req_length)
 
 static int _modbus_tcp_send_msg_pre(uint8_t *req, int req_length)
 {
-    /* Subtract the header length to the message length */
+    /* Substract the header length to the message length */
     int mbap_length = req_length - 6;
 
     req[4] = mbap_length >> 8;
@@ -933,7 +933,7 @@ modbus_t* modbus_new_tcp(const char *ip, int port)
     sa.sa_handler = SIG_IGN;
     if (sigaction(SIGPIPE, &sa, NULL) < 0) {
         /* The debug flag can't be set here... */
-        fprintf(stderr, "Could not install SIGPIPE handler.\n");
+        fprintf(stderr, "Coud not install SIGPIPE handler.\n");
         return NULL;
     }
 #endif
@@ -1024,7 +1024,7 @@ modbus_t* modbus_new_tcp_pi(const char *node, const char *service)
         dest_size = sizeof(char) * _MODBUS_TCP_PI_SERVICE_LENGTH;
         ret_size = strlcpy(ctx_tcp_pi->service, service, dest_size);
     } else {
-        /* Empty service is not allowed, error caught below. */
+        /* Empty service is not allowed, error catched below. */
         ret_size = 0;
     }
 

@@ -7,9 +7,11 @@ set -e
 
 CPP_LINT_URL="https://raw.githubusercontent.com/google/styleguide/gh-pages/cpplint/cpplint.py";
 
+# Libmodbus spelling tested and should be fixed upstream
 SPELLINGBLACKLIST=$(cat <<-BLACKLIST
       -wholename "./.codespellignore" -or \
-      -wholename "./.git/*"
+      -wholename "./.git/*" -or \
+      -wholename "./src/libmodbus/*"
 BLACKLIST
 )
 

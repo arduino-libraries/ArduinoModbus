@@ -16,8 +16,6 @@
 #include <assert.h>
 
 #ifdef ARDUINO
-#include <ArduinoRS485.h>
-
 #ifndef DEBUG
 #define printf(...) {}
 #define fprintf(...) {}
@@ -323,15 +321,15 @@ static ssize_t _modbus_rtu_send(modbus_t *ctx, const uint8_t *req, int req_lengt
     DWORD n_bytes = 0;
     return (WriteFile(ctx_rtu->w_ser.fd, req, req_length, &n_bytes, NULL)) ? (ssize_t)n_bytes : -1;
 #elif defined(ARDUINO)
-    (void)ctx;
+    modbus_rtu_t *ctx_rtu = (modbus_rtu_t*)ctx->backend_data;
 
     ssize_t size;
 
-    RS485.noReceive();
-    RS485.beginTransmission();
-    size = RS485.write(req, req_length);
-    RS485.endTransmission();
-    RS485.receive();
+    ctx_rtu->rs485->noReceive();
+    ctx_rtu->rs485->beginTransmission();
+    size = ctx_rtu->rs485->write(req, req_length);
+    ctx_rtu->rs485->endTransmission();
+    ctx_rtu->rs485->receive();
 
     return size;
 #else
@@ -394,9 +392,9 @@ static ssize_t _modbus_rtu_recv(modbus_t *ctx, uint8_t *rsp, int rsp_length)
 #if defined(_WIN32)
     return win32_ser_read(&((modbus_rtu_t *)ctx->backend_data)->w_ser, rsp, rsp_length);
 #elif defined(ARDUINO)
-    (void)ctx;
+    modbus_rtu_t *ctx_rtu = (modbus_rtu_t*)ctx->backend_data;
 
-    return RS485.readBytes(rsp, rsp_length);
+    return ctx_rtu->rs485->readBytes(rsp, rsp_length);
 #else
     return read(ctx->s, rsp, rsp_length);
 #endif
@@ -654,8 +652,8 @@ static int _modbus_rtu_connect(modbus_t *ctx)
         return -1;
     }
 #elif defined(ARDUINO)
-    RS485.begin(ctx_rtu->baud, ctx_rtu->config);
-    RS485.receive();
+    ctx_rtu->rs485->begin(ctx_rtu->baud, ctx_rtu->config);
+    ctx_rtu->rs485->receive();
 #else
     /* The O_NOCTTY flag tells UNIX that this program doesn't want
        to be the "controlling terminal" for that port. If you
@@ -1208,10 +1206,8 @@ static void _modbus_rtu_close(modbus_t *ctx)
                 (int)GetLastError());
     }
 #elif defined(ARDUINO)
-    (void)ctx_rtu;
-
-    RS485.noReceive();
-    RS485.end();
+    ctx_rtu->rs485->noReceive();
+    ctx_rtu->rs485->end();
 #else
     if (ctx->s != -1) {
         tcsetattr(ctx->s, TCSANOW, &ctx_rtu->old_tios);
@@ -1228,10 +1224,10 @@ static int _modbus_rtu_flush(modbus_t *ctx)
     ctx_rtu->w_ser.n_bytes = 0;
     return (PurgeComm(ctx_rtu->w_ser.fd, PURGE_RXCLEAR) == FALSE);
 #elif defined(ARDUINO)
-    (void)ctx;
+    modbus_rtu_t *ctx_rtu = (modbus_rtu_t*)ctx->backend_data;
 
-    while (RS485.available()) {
-        RS485.read();
+    while (ctx_rtu->rs485->available()) {
+        ctx_rtu->rs485->read();
     }
 
     return 0;
@@ -1256,14 +1252,14 @@ static int _modbus_rtu_select(modbus_t *ctx, fd_set *rset,
         return -1;
     }
 #elif defined(ARDUINO)
-    (void)ctx;
+    modbus_rtu_t *ctx_rtu = (modbus_rtu_t*)ctx->backend_data;
     (void)rset;
 
     unsigned long wait_time_millis = (tv == NULL) ? 0 : (tv->tv_sec * 1000) + (tv->tv_usec / 1000);
     unsigned long start = millis();
 
     do {
-        s_rc = RS485.available();
+        s_rc = ctx_rtu->rs485->available();
 
         if (s_rc >= length_to_read) {
             break;
@@ -1330,7 +1326,7 @@ const modbus_backend_t _modbus_rtu_backend = {
 };
 
 #ifdef ARDUINO
-modbus_t* modbus_new_rtu(unsigned long baud, uint16_t config)
+modbus_t* modbus_new_rtu(RS485Class *rs485, unsigned long baud, uint16_t config)
 #else
 modbus_t* modbus_new_rtu(const char *device,
                          int baud, char parity, int data_bit,
@@ -1362,6 +1358,7 @@ modbus_t* modbus_new_rtu(const char *device,
     ctx->backend_data = (modbus_rtu_t *)malloc(sizeof(modbus_rtu_t));
     ctx_rtu = (modbus_rtu_t *)ctx->backend_data;
 #ifdef ARDUINO
+    ctx_rtu->rs485 = rs485;
     ctx_rtu->baud = baud;
     ctx_rtu->config = config;
 #else

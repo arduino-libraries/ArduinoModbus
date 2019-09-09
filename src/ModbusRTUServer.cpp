@@ -26,7 +26,8 @@ extern "C" {
 
 #include "ModbusRTUServer.h"
 
-ModbusRTUServerClass::ModbusRTUServerClass()
+ModbusRTUServerClass::ModbusRTUServerClass(RS485Class& rs485) :
+  _rs485(&rs485)
 {
 }
 
@@ -36,7 +37,7 @@ ModbusRTUServerClass::~ModbusRTUServerClass()
 
 int ModbusRTUServerClass::begin(int id, unsigned long baudrate, uint16_t config)
 {
-  modbus_t* mb = modbus_new_rtu(baudrate, config);
+  modbus_t* mb = modbus_new_rtu(_rs485, baudrate, config);
 
   if (!ModbusServer::begin(mb, id)) {
     return 0;
@@ -58,4 +59,4 @@ void ModbusRTUServerClass::poll()
   }
 }
 
-ModbusRTUServerClass ModbusRTUServer;
+ModbusRTUServerClass ModbusRTUServer(RS485);

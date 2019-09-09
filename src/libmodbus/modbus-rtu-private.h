@@ -17,7 +17,7 @@
 #if defined(_WIN32)
 #include <windows.h>
 #elif defined(ARDUINO)
-// nothing extra needed
+#include <ArduinoRS485.h>
 #else
 #include <termios.h>
 #endif
@@ -47,6 +47,7 @@ struct win32_ser {
 
 typedef struct _modbus_rtu {
 #if defined(ARDUINO)
+    RS485Class* rs485;
     unsigned long baud;
     uint16_t config;
 #else

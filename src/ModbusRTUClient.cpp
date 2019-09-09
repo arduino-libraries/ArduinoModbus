@@ -26,7 +26,8 @@ extern "C" {
 
 #include "ModbusRTUClient.h"
 
-ModbusRTUClientClass::ModbusRTUClientClass()
+ModbusRTUClientClass::ModbusRTUClientClass(RS485Class& rs485) :
+  _rs485(&rs485)
 {
 }
 
@@ -36,7 +37,7 @@ ModbusRTUClientClass::~ModbusRTUClientClass()
 
 int ModbusRTUClientClass::begin(unsigned long baudrate, uint16_t config)
 {
-  modbus_t* mb = modbus_new_rtu(baudrate, config);
+  modbus_t* mb = modbus_new_rtu(_rs485, baudrate, config);
 
   if (!ModbusClient::begin(mb, 0x00)) {
     return 0;
@@ -47,4 +48,4 @@ int ModbusRTUClientClass::begin(unsigned long baudrate, uint16_t config)
   return 1;
 }
 
-ModbusRTUClientClass ModbusRTUClient;
+ModbusRTUClientClass ModbusRTUClient(RS485);

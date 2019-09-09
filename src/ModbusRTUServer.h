@@ -20,11 +20,13 @@
 #ifndef _MODBUS_RTU_SERVER_H_INCLUDED
 #define _MODBUS_RTU_SERVER_H_INCLUDED
 
+#include <ArduinoRS485.h>
+
 #include "ModbusServer.h"
 
 class ModbusRTUServerClass : public ModbusServer {
 public:
-  ModbusRTUServerClass();
+  ModbusRTUServerClass(RS485Class& rs485);
   virtual ~ModbusRTUServerClass();
 
   /**
@@ -42,6 +44,9 @@ public:
    * Poll interface for requests
    */
   virtual void poll();
+
+private:
+  RS485Class* _rs485;
 };
 
 extern ModbusRTUServerClass ModbusRTUServer;

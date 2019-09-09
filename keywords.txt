@@ -19,6 +19,7 @@ ModbusTCPServer	KEYWORD1
 begin	KEYWORD2
 poll	KEYWORD2
 end	KEYWORD2
+setTimeout	KEYWORD2
 
 beginTransmission	KEYWORD2
 write	KEYWORD2

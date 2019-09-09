@@ -26,7 +26,8 @@ extern "C" {
 
 #include "ModbusRTUClient.h"
 
-ModbusRTUClientClass::ModbusRTUClientClass()
+ModbusRTUClientClass::ModbusRTUClientClass() :
+  ModbusClient(1000)
 {
 }
 
@@ -41,8 +42,6 @@ int ModbusRTUClientClass::begin(unsigned long baudrate, uint16_t config)
   if (!ModbusClient::begin(mb, 0x00)) {
     return 0;
   }
-
-  modbus_set_response_timeout(mb, 1, 0);
 
   return 1;
 }

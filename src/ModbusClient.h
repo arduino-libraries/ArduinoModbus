@@ -198,14 +198,20 @@ public:
    */
   void end();
 
+  /**
+   * Set response timeout (in milliseconds)
+   */
+  void setTimeout(unsigned long ms);
+
 protected:
-  ModbusClient();
+  ModbusClient(unsigned long defaultTimeout);
   virtual ~ModbusClient();
 
   int begin(modbus_t* _mb, int defaultId);
 
 private:
   modbus_t* _mb;
+  unsigned long _timeout;
   int _defaultId;
 
   bool _transmissionBegun;

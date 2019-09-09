@@ -21,8 +21,9 @@
 
 #include "ModbusClient.h"
 
-ModbusClient::ModbusClient() :
+ModbusClient::ModbusClient(unsigned long defaultTimeout) :
   _mb(NULL),
+  _timeout(defaultTimeout),
   _defaultId(0x00),
   _transmissionBegun(false),
   _values(NULL),
@@ -68,6 +69,8 @@ int ModbusClient::begin(modbus_t* mb, int defaultId)
   _written = 0;
 
   modbus_set_error_recovery(_mb, MODBUS_ERROR_RECOVERY_PROTOCOL);
+  
+  setTimeout(_timeout);
 
   return 1;
 }
@@ -409,4 +412,13 @@ const char* ModbusClient::lastError()
   }
 
   return modbus_strerror(errno); 
+}
+
+void ModbusClient::setTimeout(unsigned long ms)
+{
+  _timeout = ms;
+
+  if (_mb) {
+    modbus_set_response_timeout(_mb, _timeout / 1000, (_timeout % 1000) * 1000);
+  }
 }

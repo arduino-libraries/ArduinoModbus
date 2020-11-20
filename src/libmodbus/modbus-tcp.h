@@ -9,6 +9,13 @@
 #define MODBUS_TCP_H
 
 #ifdef ARDUINO
+// check if __has_include ArduinoAPI
+#if defined __has_include
+#  if __has_include("api/ArduinoAPI.h")
+#define NEED_NAMESPACE
+namespace arduino {
+#  endif
+#endif
 class Client;
 class IPAddress;
 #endif
@@ -60,5 +67,11 @@ MODBUS_API int modbus_tcp_pi_accept(modbus_t *ctx, int *s);
 #endif
 
 MODBUS_END_DECLS
+
+#ifdef NEED_NAMESPACE
+}
+#endif
+
+#undef NEED_NAMESPACE
 
 #endif /* MODBUS_TCP_H */

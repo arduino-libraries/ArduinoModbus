@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#ifndef _MSC_VER
+#if !defined(_MSC_VER) && !defined(ARDUINO)
 #include <unistd.h>
 #endif
 #include <signal.h>

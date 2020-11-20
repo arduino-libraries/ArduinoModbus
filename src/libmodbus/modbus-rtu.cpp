@@ -5,16 +5,6 @@
  * SPDX-License-Identifier: LGPL-2.1+
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <string.h>
-#ifndef _MSC_VER
-#include <unistd.h>
-#endif
-#include <assert.h>
-
 #ifdef ARDUINO
 #include <ArduinoRS485.h>
 
@@ -23,6 +13,16 @@
 #define fprintf(...) {}
 #endif
 #endif
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <string.h>
+#if !defined(_MSC_VER) && !defined(ARDUINO)
+#include <unistd.h>
+#endif
+#include <assert.h>
 
 #include "modbus-private.h"
 

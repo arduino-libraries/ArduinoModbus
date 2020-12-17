@@ -129,7 +129,7 @@ public:
    * to send request on the wire.
    *
    * @param id (slave) id of target, defaults to 0x00 if not specified
-   * @param type type of write to perform, either COILS or HOLD_REGISTERS
+   * @param type type of write to perform, either COILS or HOLDING_REGISTERS
    * @param address start address to use for operation
    * @param nb number of values to write
    *
@@ -162,7 +162,7 @@ public:
    *
    * @param id (slave) id of target, defaults to 0x00 if not specified
    * @param type type of read to perform, either COILS, DISCRETE_INPUTS, 
-   *             HOLD_REGISTERS, or INPUT_REGISTERS
+   *             HOLDING_REGISTERS, or INPUT_REGISTERS
    * @param address start address to use for operation
    * @param nb number of values to read
    *

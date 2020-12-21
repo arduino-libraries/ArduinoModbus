@@ -22,6 +22,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
+      SKETCHES_REPORTS_PATH: sketches-reports
       # Libraries to install for all boards
       UNIVERSAL_LIBRARIES: |
         # Install the ArduinoModbus library from the local path
@@ -78,3 +79,11 @@ jobs:
           sketch-paths: |
             ${{ env.UNIVERSAL_SKETCH_PATHS }}
             ${{ matrix.nina-sketch-paths }}
+          enable-deltas-report: true
+          sketches-report-path: ${{ env.SKETCHES_REPORTS_PATH }}
+
+      - name: Save memory usage change report as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ env.SKETCHES_REPORTS_PATH }}
+          path: ${{ env.SKETCHES_REPORTS_PATH }}

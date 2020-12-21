@@ -40,7 +40,7 @@ void setup() {
 
   Serial.println("Modbus TCP Client Toggle");
 
-  // attempt to connect to Wifi network:
+  // attempt to connect to WiFi network:
   while (status != WL_CONNECTED) {
     Serial.print("Attempting to connect to SSID: ");
     Serial.println(ssid);

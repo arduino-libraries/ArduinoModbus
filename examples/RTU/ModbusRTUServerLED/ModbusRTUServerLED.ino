@@ -53,7 +53,7 @@ void loop() {
     // coil value set, turn LED on
     digitalWrite(ledPin, HIGH);
   } else {
-    // coild value clear, turn LED off
+    // coil value clear, turn LED off
     digitalWrite(ledPin, LOW);
   }
 }

@@ -1,7 +1,7 @@
 /*
   Modbus RTU Client Kitchen Sink
 
-  This sketch creates a Modbus RTU Client and demostrates
+  This sketch creates a Modbus RTU Client and demonstrates
   how to use various Modbus Client APIs.
 
   Circuit:
@@ -164,7 +164,7 @@ void readHoldingRegisterValues() {
 void readInputRegisterValues() {
   Serial.print("Reading input register values ... ");
 
-  // read 10 dsicrete input values from (slave) id 42,
+  // read 10 discrete input values from (slave) id 42,
   if (!ModbusRTUClient.requestFrom(42, INPUT_REGISTERS, 0x00, 10)) {
     Serial.print("failed! ");
     Serial.println(ModbusRTUClient.lastError());
@@ -181,4 +181,3 @@ void readInputRegisterValues() {
   // Alternatively, to read a single Input Register value use:
   // ModbusRTUClient.inputRegisterRead(...)
 }
-

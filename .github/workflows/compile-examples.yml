@@ -1,0 +1,89 @@
+name: Compile Examples
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/compile-examples.yml"
+      - "examples/**"
+      - "src/**"
+  push:
+    paths:
+      - ".github/workflows/compile-examples.yml"
+      - "examples/**"
+      - "src/**"
+  schedule:
+    # run every Tuesday at 3 AM UTC to catch breakage caused by changes to external dependencies (libraries, platforms)
+    - cron: "0 3 * * 2"
+  # See: https://docs.github.com/en/free-pro-team@latest/actions/reference/events-that-trigger-workflows#workflow_dispatch
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      SKETCHES_REPORTS_PATH: sketches-reports
+      # Libraries to install for all boards
+      UNIVERSAL_LIBRARIES: |
+        # Install the ArduinoModbus library from the local path
+        - source-path: ./
+        - name: ArduinoRS485
+      UNIVERSAL_SKETCH_PATHS: |
+        - examples/RTU
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        board:
+          - fqbn: arduino:avr:nano
+            nina: false
+          - fqbn: arduino:avr:leonardo
+            nina: false
+          - fqbn: arduino:megaavr:uno2018:mode=off
+            nina: true
+          - fqbn: arduino:samd:mkrwifi1010
+            nina: true
+          - fqbn: arduino:mbed:nano33ble
+            nina: false
+          - fqbn: arduino:mbed:envie_m7
+            nina: false
+
+        # Make board type-specific customizations to the matrix jobs
+        include:
+          - board:
+              # Boards with NINA-W102 module
+              nina: true
+            # Install these libraries in addition to the ones defined by env.UNIVERSAL_LIBRARIES
+            nina-libraries: |
+              - name: WiFiNINA
+            # Compile these sketches in addition to the ones defined by env.UNIVERSAL_SKETCH_PATHS
+            nina-sketch-paths: |
+              - examples/TCP
+          - board:
+              nina: false
+            nina-libraries: ""
+            nina-sketch-paths: ""
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Compile examples
+        uses: arduino/compile-sketches@main
+        with:
+          fqbn: ${{ matrix.board.fqbn }}
+          libraries: |
+            ${{ env.UNIVERSAL_LIBRARIES }}
+            ${{ matrix.nina-libraries }}
+          sketch-paths: |
+            ${{ env.UNIVERSAL_SKETCH_PATHS }}
+            ${{ matrix.nina-sketch-paths }}
+          enable-deltas-report: true
+          sketches-report-path: ${{ env.SKETCHES_REPORTS_PATH }}
+
+      - name: Save memory usage change report as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ env.SKETCHES_REPORTS_PATH }}
+          path: ${{ env.SKETCHES_REPORTS_PATH }}

@@ -65,7 +65,7 @@ public:
    * @param id (slave) id of target, defaults to 0x00 if not specified
    * @param address start address to use for operation
    *
-   * @return holiding register value on success, -1 on failure.
+   * @return holding register value on success, -1 on failure.
    */
   long holdingRegisterRead(int address);
   long holdingRegisterRead(int id, int address);

@@ -1,5 +1,5 @@
 /*
-  Modbus RTU Temeperature Sensor
+  Modbus RTU Temperature Sensor
 
   This sketch shows you how to interact with a Modbus RTU temperature and humidity sensor.
   It reads the temperature and humidity values every 5 seconds and outputs them to the

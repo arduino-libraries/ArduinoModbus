@@ -1,0 +1,26 @@
+name: Spell Check
+
+on:
+  pull_request:
+  push:
+  schedule:
+    # run every Tuesday at 3 AM UTC
+    - cron: "0 3 * * 2"
+
+jobs:
+  spellcheck:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      # See: https://github.com/codespell-project/actions-codespell/blob/master/README.md
+      - name: Spell check
+        uses: codespell-project/actions-codespell@master
+        with:
+          check_filenames: true
+          check_hidden: true
+          # In the event of a false positive, add the word in all lower case to this file:
+          ignore_words_file: extras/codespell-ignore-words-list.txt
+          skip: ./.git,./src/libmodbus

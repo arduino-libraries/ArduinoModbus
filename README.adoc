@@ -1,4 +1,11 @@
+// Define the repository information in these attributes
+:repository-owner: arduino-libraries
+:repository-name: ArduinoModbus
+
 = Modbus Library for Arduino =
+
+image:https://github.com/{repository-owner}/{repository-name}/workflows/Compile%20Examples/badge.svg["Compile Examples Status", link="https://github.com/{repository-owner}/{repository-name}/actions?workflow=Compile+Examples"]
+image:https://github.com/{repository-owner}/{repository-name}/workflows/Spell%20Check/badge.svg["Spell Check Status", link="https://github.com/{repository-owner}/{repository-name}/actions?workflow=Spell+Check"]
 
 Use http://www.modbus.org/[Modbus] with your Arduino. 
 

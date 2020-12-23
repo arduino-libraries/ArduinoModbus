@@ -1,7 +1,7 @@
 /*
   Modbus RTU Server Kitchen Sink
 
-  This sketch creates a Modbus RTU Server and demostrates
+  This sketch creates a Modbus RTU Server and demonstrates
   how to use various Modbus Server APIs.
 
   Circuit:
@@ -62,7 +62,7 @@ void loop() {
     ModbusRTUServer.discreteInputWrite(i, coilValue);
   }
 
-  // map the holiding register values to the input register values
+  // map the holding register values to the input register values
   for (int i = 0; i < numHoldingRegisters; i++) {
     long holdingRegisterValue = ModbusRTUServer.holdingRegisterRead(i);
 

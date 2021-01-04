@@ -12,12 +12,15 @@
 // check if __has_include ArduinoAPI
 #if defined __has_include
 #  if __has_include("api/ArduinoAPI.h")
-#define NEED_NAMESPACE
+#define __NEED_NAMESPACE__
 namespace arduino {
 #  endif
 #endif
 class Client;
 class IPAddress;
+#endif
+#ifdef __NEED_NAMESPACE__
+}
 #endif
 
 #include "modbus.h"
@@ -53,9 +56,14 @@ MODBUS_BEGIN_DECLS
 #define MODBUS_TCP_MAX_ADU_LENGTH  260
 
 #ifdef ARDUINO
+#ifdef __NEED_NAMESPACE__
+MODBUS_API modbus_t* modbus_new_tcp(arduino::Client* client, arduino::IPAddress ip_address, int port);
+MODBUS_API int modbus_tcp_accept(modbus_t *ctx, arduino::Client* client);
+#else
 MODBUS_API modbus_t* modbus_new_tcp(Client* client, IPAddress ip_address, int port);
-MODBUS_API int modbus_tcp_listen(modbus_t *ctx);
 MODBUS_API int modbus_tcp_accept(modbus_t *ctx, Client* client);
+#endif
+MODBUS_API int modbus_tcp_listen(modbus_t *ctx);
 #else
 MODBUS_API modbus_t* modbus_new_tcp(const char *ip_address, int port);
 MODBUS_API int modbus_tcp_listen(modbus_t *ctx, int nb_connection);
@@ -67,11 +75,5 @@ MODBUS_API int modbus_tcp_pi_accept(modbus_t *ctx, int *s);
 #endif
 
 MODBUS_END_DECLS
-
-#ifdef NEED_NAMESPACE
-}
-#endif
-
-#undef NEED_NAMESPACE
 
 #endif /* MODBUS_TCP_H */

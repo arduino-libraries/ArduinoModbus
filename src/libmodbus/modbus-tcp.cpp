@@ -28,6 +28,7 @@
 # define SHUT_RDWR 2
 # define close closesocket
 #elif defined(ARDUINO)
+#include "Arduino.h"
 #ifndef DEBUG
 #define printf(...) {}
 #define fprintf(...) {}
@@ -738,7 +739,11 @@ int modbus_tcp_pi_listen(modbus_t *ctx, int nb_connection)
 
 
 #ifdef ARDUINO
+#ifdef __NEED_NAMESPACE__
+int modbus_tcp_accept(modbus_t *ctx, arduino::Client* client)
+#else
 int modbus_tcp_accept(modbus_t *ctx, Client* client)
+#endif
 #else
 int modbus_tcp_accept(modbus_t *ctx, int *s)
 #endif
@@ -913,7 +918,11 @@ const modbus_backend_t _modbus_tcp_pi_backend = {
 #endif
 
 #ifdef ARDUINO
+#ifdef __NEED_NAMESPACE__
+modbus_t* modbus_new_tcp(arduino::Client* client, arduino::IPAddress ip_address, int port)
+#else
 modbus_t* modbus_new_tcp(Client* client, IPAddress ip_address, int port)
+#endif
 #else
 modbus_t* modbus_new_tcp(const char *ip, int port)
 #endif

@@ -72,6 +72,7 @@ jobs:
       - name: Compile examples
         uses: arduino/compile-sketches@main
         with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           fqbn: ${{ matrix.board.fqbn }}
           libraries: |
             ${{ env.UNIVERSAL_LIBRARIES }}

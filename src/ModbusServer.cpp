@@ -250,28 +250,38 @@ int ModbusServer::registerMaskWrite(int address, uint16_t andMask, uint16_t orMa
 
 int ModbusServer::discreteInputWrite(int address, uint8_t value)
 {
+  return writeDiscreteInputs(address, &value, 1);
+}
+
+int ModbusServer::writeDiscreteInputs(int address, uint8_t values[], int nb)
+{
   if (_mbMapping.start_input_bits > address || 
-      (_mbMapping.start_input_bits + _mbMapping.nb_input_bits) < (address + 1)) {
+      (_mbMapping.start_input_bits + _mbMapping.nb_input_bits) < (address + nb)) {
     errno = EMBXILADD;
 
     return 0;
   }
 
-  _mbMapping.tab_input_bits[address - _mbMapping.start_input_bits] = value;
+  memcpy(&_mbMapping.tab_input_bits[address - _mbMapping.start_input_bits], values, sizeof(values[0]) * nb);
 
   return 1;
 }
 
 int ModbusServer::inputRegisterWrite(int address, uint16_t value)
 {
+  return writeInputRegisters(address, &value, 1);
+}
+
+int ModbusServer::writeInputRegisters(int address, uint16_t values[], int nb)
+{
   if (_mbMapping.start_input_registers > address || 
-      (_mbMapping.start_input_registers + _mbMapping.nb_input_registers) < (address + 1)) {
+      (_mbMapping.start_input_registers + _mbMapping.nb_input_registers) < (address + nb)) {
     errno = EMBXILADD;
 
     return 0;
   }
 
-  _mbMapping.tab_input_registers[address - _mbMapping.start_input_registers] = value;
+  memcpy(&_mbMapping.tab_input_registers[address - _mbMapping.start_input_registers], values, sizeof(values[0]) * nb);
 
   return 1;
 }

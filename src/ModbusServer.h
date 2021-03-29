@@ -30,6 +30,16 @@ class ModbusServer {
 
 public:
   /**
+   * Configure the servers coil starting address.
+   *
+   * @param ptr pointer address of existing data struct
+   * @param startAddress start address of holding registers
+   * @param nb number of holding registers to configure
+   *
+   * @return 0 on success, 1 on failure
+   */
+  int configureCoilPointer(uint8_t *ptr, int startAddress, int nb);
+  /**
    * Configure the servers coils.
    *
    * @param startAddress start address of coils
@@ -38,7 +48,16 @@ public:
    * @return 0 on success, 1 on failure
    */
   int configureCoils(int startAddress, int nb);
-
+  /**
+   * Configure the servers discrete inputs starting address.
+   *
+   * @param ptr pointer address of existing data struct
+   * @param startAddress start address of holding registers
+   * @param nb number of holding registers to configure
+   *
+   * @return 0 on success, 1 on failure
+   */
+  int configureDiscreteInputPointer(uint8_t *ptr, int startAddress, int nb);
   /**
    * Configure the servers discrete inputs.
    *
@@ -49,6 +68,19 @@ public:
    */
   int configureDiscreteInputs(int startAddress, int nb);
 
+
+  /**
+   * Configure the servers holding registers starting address.
+   *
+   * @param ptr pointer address of existing data struct
+   * @param startAddress start address of holding registers
+   * @param nb number of holding registers to configure
+   *
+   * @return 0 on success, 1 on failure
+   */
+  int configureHoldingRegisterPointer(uint16_t *ptr, int startAddress, int nb);
+
+
   /**
    * Configure the servers holding registers.
    *
@@ -56,8 +88,19 @@ public:
    * @param nb number of holding registers to configure
    *
    * @return 0 on success, 1 on failure
-   */
+   */  
   int configureHoldingRegisters(int startAddress, int nb);
+  
+    /**
+   * Configure the servers input registers starting address.
+   *
+   * @param ptr pointer address of existing data struct
+   * @param startAddress start address of holding registers
+   * @param nb number of holding registers to configure
+   *
+   * @return 0 on success, 1 on failure
+   */
+  int configureInputRegisterPointer(uint16_t *ptr, int startAddress, int nb);
 
   /**
    * Configure the servers input registers.
@@ -67,6 +110,7 @@ public:
    *
    * @return 0 on success, 1 on failure
    */
+  
   int configureInputRegisters(int startAddress, int nb);
 
   // same as ModbusClient.h

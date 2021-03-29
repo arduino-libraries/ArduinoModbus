@@ -50,6 +50,21 @@ ModbusServer::~ModbusServer()
   }
 }
 
+int ModbusServer::configureCoilPointer(uint8_t *ptr, int startAddress, int nb)
+{
+  if (startAddress < 0 || nb < 1) {
+    errno = EINVAL;
+
+    return -1;
+  }
+
+  _mbMapping.tab_bits = ptr;
+  _mbMapping.start_bits = startAddress;
+  _mbMapping.nb_bits = nb;
+
+  return 1;
+}
+
 int ModbusServer::configureCoils(int startAddress, int nb)
 {
   if (startAddress < 0 || nb < 1) {
@@ -72,6 +87,20 @@ int ModbusServer::configureCoils(int startAddress, int nb)
   memset(_mbMapping.tab_bits, 0x00, s);
   _mbMapping.start_bits = startAddress;
   _mbMapping.nb_bits = nb;
+
+  return 1;
+}
+
+int ModbusServer::configureDiscreteInputPointer(uint8_t *ptr, int startAddress, int nb)
+{
+  if (startAddress < 0 || nb < 1) {
+    errno = EINVAL;
+
+    return -1;
+  }
+  _mbMapping.tab_input_bits = ptr;
+  _mbMapping.start_input_bits = startAddress;
+  _mbMapping.nb_input_bits = nb;
 
   return 1;
 }
@@ -102,6 +131,20 @@ int ModbusServer::configureDiscreteInputs(int startAddress, int nb)
   return 1;
 }
 
+
+int ModbusServer::configureHoldingRegisterPointer(uint16_t *ptr, int startAddress, int nb)
+{
+  if (startAddress < 0 || nb < 1) {
+    errno = EINVAL;
+
+    return -1;
+  }
+  _mbMapping.tab_registers = ptr;
+  _mbMapping.start_registers = startAddress;
+  _mbMapping.nb_registers = nb;
+  return 1;  
+}
+
 int ModbusServer::configureHoldingRegisters(int startAddress, int nb)
 {
   if (startAddress < 0 || nb < 1) {
@@ -124,6 +167,20 @@ int ModbusServer::configureHoldingRegisters(int startAddress, int nb)
   memset(_mbMapping.tab_registers, 0x00, s);
   _mbMapping.start_registers = startAddress;
   _mbMapping.nb_registers = nb;
+
+  return 1;
+}
+
+int ModbusServer::configureInputRegisterPointer(uint16_t *ptr, int startAddress, int nb)
+{
+  if (startAddress < 0 || nb < 1) {
+    errno = EINVAL;
+
+    return -1;
+  }
+  _mbMapping.tab_input_registers = ptr;
+  _mbMapping.start_input_registers = startAddress;
+  _mbMapping.nb_input_registers = nb;
 
   return 1;
 }

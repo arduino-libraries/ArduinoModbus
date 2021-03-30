@@ -37,20 +37,40 @@ jobs:
       matrix:
         board:
           - fqbn: arduino:avr:nano
+            ethernet: true
             nina: false
           - fqbn: arduino:avr:leonardo
+            ethernet: true
             nina: false
           - fqbn: arduino:megaavr:uno2018:mode=off
+            ethernet: true
             nina: true
           - fqbn: arduino:samd:mkrwifi1010
+            ethernet: true
             nina: true
           - fqbn: arduino:mbed:nano33ble
+            ethernet: false
             nina: false
           - fqbn: arduino:mbed:envie_m7
+            ethernet: false
             nina: false
 
         # Make board type-specific customizations to the matrix jobs
         include:
+          - board:
+              # Boards with Ethernet library support
+              ethernet: true
+            # Install these libraries in addition to the ones defined by env.UNIVERSAL_LIBRARIES
+            ethernet-libraries: |
+              - name: Ethernet
+            # Compile these sketches in addition to the ones defined by env.UNIVERSAL_SKETCH_PATHS
+            ethernet-sketch-paths: |
+              - examples/TCP/EthernetModbusClientToggle
+              - examples/TCP/EthernetModbusServerLED
+          - board:
+              ethernet: false
+            ethernet-libraries: ""
+            ethernet-sketch-paths: ""
           - board:
               # Boards with NINA-W102 module
               nina: true
@@ -59,7 +79,8 @@ jobs:
               - name: WiFiNINA
             # Compile these sketches in addition to the ones defined by env.UNIVERSAL_SKETCH_PATHS
             nina-sketch-paths: |
-              - examples/TCP
+              - examples/TCP/WiFiModbusClientToggle
+              - examples/TCP/WiFiModbusServerLED
           - board:
               nina: false
             nina-libraries: ""
@@ -76,9 +97,11 @@ jobs:
           fqbn: ${{ matrix.board.fqbn }}
           libraries: |
             ${{ env.UNIVERSAL_LIBRARIES }}
+            ${{ matrix.ethernet-libraries }}
             ${{ matrix.nina-libraries }}
           sketch-paths: |
             ${{ env.UNIVERSAL_SKETCH_PATHS }}
+            ${{ matrix.ethernet-sketch-paths }}
             ${{ matrix.nina-sketch-paths }}
           enable-deltas-report: true
           sketches-report-path: ${{ env.SKETCHES_REPORTS_PATH }}

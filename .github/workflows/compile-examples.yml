@@ -4,11 +4,13 @@ on:
   pull_request:
     paths:
       - ".github/workflows/compile-examples.yml"
+      - "library.properties"
       - "examples/**"
       - "src/**"
   push:
     paths:
       - ".github/workflows/compile-examples.yml"
+      - "library.properties"
       - "examples/**"
       - "src/**"
   schedule:

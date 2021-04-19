@@ -12,7 +12,7 @@ jobs:
 
     steps:
       - name: Comment size deltas reports to PRs
-        uses: arduino/report-size-deltas@main
+        uses: arduino/report-size-deltas@v1
         with:
           # The name of the workflow artifact created by the "Compile Examples" workflow
           sketches-reports-source: sketches-reports

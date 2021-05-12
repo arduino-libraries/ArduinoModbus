@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v2.3.4
 
       # See: https://github.com/codespell-project/actions-codespell/blob/master/README.md
       - name: Spell check

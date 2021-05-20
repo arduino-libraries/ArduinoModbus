@@ -44,16 +44,18 @@ void setup() {
 
 void loop() {
   // poll for Modbus RTU requests
-  ModbusRTUServer.poll();
+  int packetReceived = ModbusRTUServer.poll();
 
-  // read the current value of the coil
-  int coilValue = ModbusRTUServer.coilRead(0x00);
-
-  if (coilValue) {
-    // coil value set, turn LED on
-    digitalWrite(ledPin, HIGH);
-  } else {
-    // coil value clear, turn LED off
-    digitalWrite(ledPin, LOW);
+  if(packetReceived) {
+    // read the current value of the coil
+    int coilValue = ModbusRTUServer.coilRead(0x00);
+  
+    if (coilValue) {
+      // coil value set, turn LED on
+      digitalWrite(ledPin, HIGH);
+    } else {
+      // coil value clear, turn LED off
+      digitalWrite(ledPin, LOW);
+    }
   }
 }

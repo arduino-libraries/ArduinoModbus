@@ -41,7 +41,7 @@ public:
   /**
    * Poll interface for requests
    */
-  virtual void poll();
+  virtual int poll();
 };
 
 extern ModbusRTUServerClass ModbusRTUServer;

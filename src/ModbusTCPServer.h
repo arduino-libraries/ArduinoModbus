@@ -48,7 +48,7 @@ public:
   /**
    * Poll accepted client for requests
    */
-  virtual void poll();
+  virtual int poll();
 
 private:
   Client* _client;

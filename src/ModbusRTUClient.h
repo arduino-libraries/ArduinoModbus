@@ -41,7 +41,7 @@ public:
   int begin(RS485Class& rs485, unsigned long baudrate, uint16_t config = SERIAL_8N1);
 
 private:
-  RS485Class* _rs485;
+  RS485Class* _rs485 = &RS485;
 };
 
 extern ModbusRTUClientClass ModbusRTUClient;

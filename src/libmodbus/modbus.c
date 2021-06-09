@@ -19,6 +19,7 @@
 #include <unistd.h>
 #endif
 #ifdef ARDUINO
+#include <Arduino.h>
 
 #ifndef DEBUG
 #define printf(...) {}

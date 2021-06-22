@@ -32,7 +32,7 @@ ModbusRTUClientClass::ModbusRTUClientClass() :
 }
 
 ModbusRTUClientClass::ModbusRTUClientClass(RS485Class& rs485) :
-  _rs485(&rs485), ModbusClient(1000)
+  ModbusClient(1000),  _rs485(&rs485)
 {
 }
 

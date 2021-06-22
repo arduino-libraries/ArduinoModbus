@@ -19,6 +19,7 @@
 #include <unistd.h>
 #endif
 #ifdef ARDUINO
+#include <stdbool.h>
 #include <Arduino.h>
 
 #ifndef DEBUG

@@ -51,11 +51,6 @@
 #define ENOTSUP 134
 #endif
 
-/* workaround for stm32duino delay and delayMicroseconds */
-#ifdef ARDUINO_ARCH_STM32
-#include <wiring_time.h>
-#endif
-
 #include "modbus.h"
 #include "modbus-private.h"
 

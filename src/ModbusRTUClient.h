@@ -37,8 +37,8 @@ public:
    *
    * Return 1 on success, 0 on failure
    */
-  int begin(unsigned long baudrate, uint16_t config = SERIAL_8N1);
-  int begin(RS485Class& rs485, unsigned long baudrate, uint16_t config = SERIAL_8N1);
+  int begin(unsigned long baudrate, RS485_SER_CONF_TYPE config = SERIAL_8N1);
+  int begin(RS485Class& rs485, unsigned long baudrate, RS485_SER_CONF_TYPE config = SERIAL_8N1);
 
 private:
   RS485Class* _rs485 = &RS485;

@@ -19,7 +19,7 @@ MODBUS_BEGIN_DECLS
 
 #ifdef ARDUINO
 class RS485Class;
-MODBUS_API modbus_t* modbus_new_rtu(RS485Class *rs485, unsigned long baud, uint16_t config);
+MODBUS_API modbus_t* modbus_new_rtu(RS485Class *rs485, unsigned long baud, RS485_SER_CONF_TYPE config);
 #else
 MODBUS_API modbus_t* modbus_new_rtu(const char *device, int baud, char parity,
                                     int data_bit, int stop_bit);

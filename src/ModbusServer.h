@@ -126,8 +126,10 @@ public:
 
   /**
    * Poll for requests
+   * 
+   * @return 1 on request, 0 on no request.
    */
-  virtual void poll() = 0;
+  virtual int poll() = 0;
 
   /**
    * Stop the server

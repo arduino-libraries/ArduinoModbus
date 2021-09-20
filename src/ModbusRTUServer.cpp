@@ -30,17 +30,13 @@ ModbusRTUServerClass::ModbusRTUServerClass()
 {
 }
 
-ModbusRTUServerClass::ModbusRTUServerClass(RS485Class& rs485) : _rs485(&rs485)
-{
-}
-
 ModbusRTUServerClass::~ModbusRTUServerClass()
 {
 }
 
 int ModbusRTUServerClass::begin(int id, unsigned long baudrate, uint16_t config)
 {
-  modbus_t* mb = modbus_new_rtu(_rs485, baudrate, config);
+  modbus_t* mb = modbus_new_rtu(baudrate, config);
 
   if (!ModbusServer::begin(mb, id)) {
     return 0;
@@ -51,13 +47,7 @@ int ModbusRTUServerClass::begin(int id, unsigned long baudrate, uint16_t config)
   return 1;
 }
 
-int ModbusRTUServerClass::begin(RS485Class& rs485, int id, unsigned long baudrate, uint16_t config)
-{
-  _rs485 = &rs485;
-  return begin(id, baudrate, config);
-}
-
-void ModbusRTUServerClass::poll()
+int ModbusRTUServerClass::poll()
 {
   uint8_t request[MODBUS_RTU_MAX_ADU_LENGTH];
 
@@ -65,7 +55,9 @@ void ModbusRTUServerClass::poll()
 
   if (requestLength > 0) {
     modbus_reply(_mb, request, requestLength, &_mbMapping);
+    return 1;
   }
+  return 0;
 }
 
 ModbusRTUServerClass ModbusRTUServer;

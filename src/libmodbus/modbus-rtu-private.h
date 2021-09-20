@@ -17,7 +17,7 @@
 #if defined(_WIN32)
 #include <windows.h>
 #elif defined(ARDUINO)
-#include <ArduinoRS485.h>
+// nothing extra needed
 #else
 #include <termios.h>
 #endif
@@ -49,7 +49,6 @@ typedef struct _modbus_rtu {
 #if defined(ARDUINO)
     unsigned long baud;
     uint16_t config;
-    RS485Class* rs485;
 #else
     /* Device: "/dev/ttyS0", "/dev/ttyUSB0" or "/dev/tty.USA19*" on Mac OS X. */
     char *device;

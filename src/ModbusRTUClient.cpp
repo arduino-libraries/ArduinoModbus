@@ -31,30 +31,19 @@ ModbusRTUClientClass::ModbusRTUClientClass() :
 {
 }
 
-ModbusRTUClientClass::ModbusRTUClientClass(RS485Class& rs485) :
-  _rs485(&rs485), ModbusClient(1000)
-{
-}
-
 ModbusRTUClientClass::~ModbusRTUClientClass()
 {
 }
 
 int ModbusRTUClientClass::begin(unsigned long baudrate, uint16_t config)
 {
-  modbus_t* mb = modbus_new_rtu(_rs485, baudrate, config);
+  modbus_t* mb = modbus_new_rtu(baudrate, config);
 
   if (!ModbusClient::begin(mb, 0x00)) {
     return 0;
   }
 
   return 1;
-}
-
-int ModbusRTUClientClass::begin(RS485Class& rs485, unsigned long baudrate, uint16_t config)
-{
-  _rs485 = &rs485;
-  return begin(baudrate, config);
 }
 
 ModbusRTUClientClass ModbusRTUClient;

@@ -50,11 +50,6 @@
 #define ENOTSUP 134
 #endif
 
-/* workaround for stm32duino delay and delayMicroseconds */
-#ifdef ARDUINO_ARCH_STM32
-#include <wiring_time.h>
-#endif
-
 #include "modbus.h"
 #include "modbus-private.h"
 
@@ -731,13 +726,13 @@ static int response_exception(modbus_t *ctx, sft_t *sft,
     int rsp_length;
 
     /* Print debug message */
-    if (ctx->debug) {
-        va_list ap;
+    // if (ctx->debug) {
+    //     va_list ap;
 
-        va_start(ap, template);
-        vfprintf(stderr, template, ap);
-        va_end(ap);
-    }
+    //     va_start(ap, template);
+    //     vfprintf(stderr, template, ap);
+    //     va_end(ap);
+    // }
 
     /* Flush if required */
     if (to_flush) {
@@ -1018,7 +1013,8 @@ int modbus_reply(modbus_t *ctx, const uint8_t *req,
                 ctx, &sft, MODBUS_EXCEPTION_ILLEGAL_DATA_VALUE, rsp, TRUE,
                 "Illegal nb of values (W%d, R%d) in write_and_read_registers (max W%d, R%d)\n",
                 nb_write, nb, MODBUS_MAX_WR_WRITE_REGISTERS, MODBUS_MAX_WR_READ_REGISTERS);
-        } else if (mapping_address < 0 ||
+        } 
+        else if (mapping_address < 0 ||
                    (mapping_address + nb) > mb_mapping->nb_registers ||
                    mapping_address < 0 ||
                    (mapping_address_write + nb_write) > mb_mapping->nb_registers) {

@@ -58,6 +58,15 @@ MODBUS_BEGIN_DECLS
 #define ON 1
 #endif
 
+/* ESP8266 / ESP32 compatibility */
+#if defined(ESP8266)
+#define RS485_SER_CONF_TYPE SerialConfig
+#elif defined(ESP32)
+#define RS485_SER_CONF_TYPE uint32_t
+#else
+#define RS485_SER_CONF_TYPE uint16_t
+#endif
+
 /* Modbus function codes */
 #define MODBUS_FC_READ_COILS                0x01
 #define MODBUS_FC_READ_DISCRETE_INPUTS      0x02

@@ -59,12 +59,14 @@ MODBUS_BEGIN_DECLS
 #endif
 
 /* ESP8266 / ESP32 compatibility */
-#if defined(ESP8266)
-#define RS485_SER_CONF_TYPE SerialConfig
-#elif defined(ESP32)
-#define RS485_SER_CONF_TYPE uint32_t
-#else
-#define RS485_SER_CONF_TYPE uint16_t
+#ifndef RS485_SER_CONF_TYPE
+    #if defined(ESP8266)
+    #define RS485_SER_CONF_TYPE SerialConfig
+    #elif defined(ESP32)
+    #define RS485_SER_CONF_TYPE uint32_t
+    #else
+    #define RS485_SER_CONF_TYPE uint16_t
+    #endif
 #endif
 
 /* Modbus function codes */

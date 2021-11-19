@@ -499,7 +499,10 @@ static void _modbus_tcp_close(modbus_t *ctx)
 #ifdef ARDUINO
     modbus_tcp_t *ctx_tcp = (modbus_tcp_t*)ctx->backend_data;
 
-    ctx_tcp->client->stop();
+    if(ctx_tcp && ctx_tcp->client) { 
+        ctx_tcp->client->stop();
+    }
+    
 #else
     if (ctx->s != -1) {
         shutdown(ctx->s, SHUT_RDWR);

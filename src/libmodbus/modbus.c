@@ -864,7 +864,7 @@ int modbus_reply(modbus_t *ctx, const uint8_t *req,
 #else
             if (data == 0xFF00 || data == 0x0) {
 #endif
-                mb_mapping->tab_bits[mapping_address] = data ? ON : OFF;
+                mb_mapping->tab_bits[mapping_address] = data ? 1 : 0;
                 memcpy(rsp, req, req_length);
                 rsp_length = req_length;
             } else {

@@ -17,15 +17,33 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef _ARDUINO_MODBUS_H_INCLUDED
-#define _ARDUINO_MODBUS_H_INCLUDED
+#ifndef _MODBUS_ASCII_CLIENT_H_INCLUDED
+#define _MODBUS_ASCII_CLIENT_H_INCLUDED
 
-#include "ModbusASCIIClient.h"
+#include "ModbusClient.h"
+#include <ArduinoRS485.h>
 
-#include "ModbusRTUClient.h"
-#include "ModbusRTUServer.h"
+class ModbusASCIIClientClass : public ModbusClient {
+public:
+  ModbusASCIIClientClass();
+  ModbusASCIIClientClass(RS485Class& rs485);
+  virtual ~ModbusASCIIClientClass();
 
-#include "ModbusTCPClient.h"
-#include "ModbusTCPServer.h"
+  /**
+   * Start the Modbus RTU client with the specified parameters
+   *
+   * @param baudrate Baud rate to use
+   * @param config serial config. to use defaults to SERIAL_8N1
+   *
+   * Return 1 on success, 0 on failure
+   */
+  int begin(unsigned long baudrate, RS485_SER_CONF_TYPE config = SERIAL_8N1);
+  int begin(RS485Class& rs485, unsigned long baudrate, RS485_SER_CONF_TYPE config = SERIAL_8N1);
+
+private:
+  RS485Class* _rs485 = &RS485;
+};
+
+extern ModbusASCIIClientClass ModbusASCIIClient;
 
 #endif

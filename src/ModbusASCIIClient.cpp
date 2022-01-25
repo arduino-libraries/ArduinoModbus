@@ -17,15 +17,44 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef _ARDUINO_MODBUS_H_INCLUDED
-#define _ARDUINO_MODBUS_H_INCLUDED
+#include <errno.h>
+
+extern "C" {
+#include "libmodbus/modbus.h"
+#include "libmodbus/modbus-ascii.h"
+}
 
 #include "ModbusASCIIClient.h"
 
-#include "ModbusRTUClient.h"
-#include "ModbusRTUServer.h"
+ModbusASCIIClientClass::ModbusASCIIClientClass() :
+  ModbusClient(1000)
+{
+}
 
-#include "ModbusTCPClient.h"
-#include "ModbusTCPServer.h"
+ModbusASCIIClientClass::ModbusASCIIClientClass(RS485Class& rs485) :
+  ModbusClient(1000),  _rs485(&rs485)
+{
+}
 
-#endif
+ModbusASCIIClientClass::~ModbusASCIIClientClass()
+{
+}
+
+int ModbusASCIIClientClass::begin(unsigned long baudrate, RS485_SER_CONF_TYPE config)
+{
+  modbus_t* mb = modbus_new_ascii(_rs485, baudrate, config);
+
+  if (!ModbusClient::begin(mb, 0x00)) {
+    return 0;
+  }
+
+  return 1;
+}
+
+int ModbusASCIIClientClass::begin(RS485Class& rs485, unsigned long baudrate, RS485_SER_CONF_TYPE config)
+{
+  _rs485 = &rs485;
+  return begin(baudrate, config);
+}
+
+ModbusASCIIClientClass ModbusASCIIClient;

@@ -7,7 +7,7 @@
 
 #ifdef ARDUINO
 #include <ArduinoRS485.h>
-#include <ovio_core.h>
+
 #ifndef DEBUG
 #define printf(...) \
     {               \

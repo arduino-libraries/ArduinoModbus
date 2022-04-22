@@ -2,7 +2,7 @@
 
 ## Modbus Client
 
-### `coilRead()`
+### `Modbus.coilRead()`
 
 #### Description
 
@@ -84,29 +84,7 @@ long inputRegisterRead(int id, int address);
 #### Returns
 input register value on success, -1 on failure.
 
-### `coilWrite()`
-
-#### Description
-
-Perform a "Write Single Coil" operation for the specified address and value.
-
-#### Syntax
-
-```
-int coilWrite(int address, uint8_t value);
-int coilWrite(int id, int address, uint8_t value);
-```
-
-#### Parameters
-- id (slave) - id of target, defaults to 0x00 if not specified
-- address address to use for operation
-- value coi -l value to write
-
-
-#### Returns
-1 on success, 0 on failure.
-
-### `coilWrite()`
+### `Modbus.coilWrite()`
 
 #### Description
 
@@ -197,7 +175,7 @@ int beginTransmission(int id, int type, int address, int nb);
 #### Returns
 1 on success, 0 on failure
 
-### `write()`
+### `Modbus.write()`
 
 #### Description
 
@@ -259,7 +237,7 @@ type - type of read to perform, either COILS, DISCRETE_INPUTS, HOLD_REGISTERS, o
 #### Returns
 0 on failure, number of values read on success
 
-### `available()`
+### `Modbus.available()`
 
 #### Description
 
@@ -278,7 +256,7 @@ none
 #### Returns
 number of values available for reading use read()
 
-### `read()`
+### `Modbus.read()`
 
 #### Description
 
@@ -297,7 +275,7 @@ None
 #### Returns
 -1 on failure, value on success
 
-### `lastError()`
+### `Modbus.lastError()`
 
 #### Description
 
@@ -316,7 +294,7 @@ none
 #### Returns
 Last error reason as a C string
 
-### `end()`
+### `Modbus.end()`
 
 #### Description
 
@@ -337,7 +315,7 @@ nothing
 
 ## ModbusRTUClient Class
 
-### `begin()`
+### `ModbusRTUClient.begin()`
 
 #### Description
 
@@ -375,7 +353,7 @@ ModbusTCPClient(client);
 #### Parameters
 - Client - to use for the transport
 
-### `begin()`
+### `ModbusTCPClient.begin()`
 
 #### Description
 
@@ -395,7 +373,7 @@ modbusTCPClient.begin(ip, port);
 #### Returns
 1 on success, 0 on failure
 
-### `connected()`
+### `ModbusTCPClient.connected()`
 
 #### Description
 
@@ -414,7 +392,7 @@ None
 #### Returns
 Returns true if the client is connected, false if not.
 
-### `stop()`
+### `ModbusTCPClient.stop()`
 
 #### Description
 
@@ -515,7 +493,7 @@ int configureInputRegisters(int startAddress, int nb);
 #### Returns
 0 on success, 1 on failure
 
-### `coilRead()`
+### `ModbusServer.coilRead()`
 
 #### Description
 
@@ -596,7 +574,7 @@ long inputRegisterRead(int id, int address);
 #### Returns
 input register value on success, -1 on failure.
 
-### `coilWrite()`
+### `ModbusServer.coilWrite()`
 
 #### Description
 
@@ -743,7 +721,7 @@ int writeInputRegisters(int address, uint16_t values[], int nb);
 #### Returns
 1 on success, 0 on failure.
 
-### `poll()`
+### `ModbusServer.poll()`
 
 #### Description
 
@@ -761,7 +739,7 @@ None
 #### Returns
 nothing
 
-### `end()`
+### `ModbusServer.end()`
 
 #### Description
 
@@ -781,7 +759,7 @@ nothing
 
 ## ModbusRTUServer Class
 
-### `begin()`
+### `ModbusRTUServer.begin()`
 
 #### Description
 
@@ -819,7 +797,7 @@ ModbusTCPServer();
 #### Parameters
 None
 
-### `begin()`
+### `ModbusTCPServer.begin()`
 
 #### Description
 
@@ -839,7 +817,7 @@ modbusTCPserver.begin(id);
 #### Returns
 1 on success, 0 on failure
 
-### `accept()`
+### `ModbusTCPServer.accept()`
 
 #### Description
 

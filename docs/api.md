@@ -2,7 +2,7 @@
 
 ## Modbus Client
 
-### `coilRead()`
+### `client.coilRead()`
 
 #### Description
 
@@ -23,7 +23,7 @@ int coilRead(int id, int address);
 #### Returns
 coil value on success, -1 on failure.
 
-### `discreteInputRead()`
+### `client.discreteInputRead()`
 
 #### Description
 
@@ -44,7 +44,7 @@ int discreteInputRead(int id, int address);
 #### Returns
 discrete input value on success, -1 on failure.
 
-### `holdingRegisterRead()`
+### `client.holdingRegisterRead()`
 
 #### Description
 
@@ -63,7 +63,7 @@ long holdingRegisterRead(int id, int address);
 - address start address to use for operation
 - holiding register value on success, -1 on failure.
 
-### `inputRegisterRead()`
+### `client.inputRegisterRead()`
 
 #### Description
 
@@ -84,7 +84,7 @@ long inputRegisterRead(int id, int address);
 #### Returns
 input register value on success, -1 on failure.
 
-### `coilWrite()`
+### `client.coilWrite()`
 
 #### Description
 
@@ -106,29 +106,7 @@ int coilWrite(int id, int address, uint8_t value);
 #### Returns
 1 on success, 0 on failure.
 
-### `coilWrite()`
-
-#### Description
-
-Perform a "Write Single Coil" operation for the specified address and value.
-
-#### Syntax
-
-```
-int coilWrite(int address, uint8_t value);
-int coilWrite(int id, int address, uint8_t value);
-```
-
-#### Parameters
-- id (slave) - id of target, defaults to 0x00 if not specified
-- address address to use for operation
-- value coi -l value to write
-
-
-#### Returns
-1 on success, 0 on failure.
-
-### `holdingRegisterWrite()`
+### `client.holdingRegisterWrite()`
 
 #### Description
 
@@ -150,7 +128,7 @@ int holdingRegisterWrite(int id, int address, uint16_t value);
 #### Returns
 1 on success, 0 on failure.
 
-### `registerMaskWrite()`
+### `client.registerMaskWrite()`
 
 #### Description
 
@@ -173,7 +151,7 @@ int registerMaskWrite(int id, int address, uint16_t andMask, uint16_t orMask);
 #### Returns
 1 on success, 0 on failure.
 
-### `beginTransmission()`
+### `client.beginTransmission()`
 
 #### Description
 
@@ -197,7 +175,7 @@ int beginTransmission(int id, int type, int address, int nb);
 #### Returns
 1 on success, 0 on failure
 
-### `write()`
+### `client.write()`
 
 #### Description
 
@@ -216,7 +194,7 @@ int write(unsigned int value);
 #### Returns
 1 on success, 0 on failure
 
-### `endTransmission()`
+### `client.endTransmission()`
 
 #### Description
 
@@ -235,7 +213,7 @@ none
 #### Returns
 1 on success, 0 on failure
 
-### `requestFrom()`
+### `client.requestFrom()`
 
 #### Description
 
@@ -259,7 +237,7 @@ type - type of read to perform, either COILS, DISCRETE_INPUTS, HOLD_REGISTERS, o
 #### Returns
 0 on failure, number of values read on success
 
-### `available()`
+### `client.available()`
 
 #### Description
 
@@ -278,7 +256,7 @@ none
 #### Returns
 number of values available for reading use read()
 
-### `read()`
+### `client.read()`
 
 #### Description
 
@@ -297,7 +275,7 @@ None
 #### Returns
 -1 on failure, value on success
 
-### `lastError()`
+### `client.lastError()`
 
 #### Description
 
@@ -316,7 +294,7 @@ none
 #### Returns
 Last error reason as a C string
 
-### `end()`
+### `client.end()`
 
 #### Description
 
@@ -337,7 +315,7 @@ nothing
 
 ## ModbusRTUClient Class
 
-### `begin()`
+### `modbusRTUClient.begin()`
 
 #### Description
 
@@ -375,7 +353,7 @@ ModbusTCPClient(client);
 #### Parameters
 - Client - to use for the transport
 
-### `begin()`
+### `modbusTCPClient.begin()`
 
 #### Description
 
@@ -395,7 +373,7 @@ modbusTCPClient.begin(ip, port);
 #### Returns
 1 on success, 0 on failure
 
-### `connected()`
+### `modbusTCPClient.connected()`
 
 #### Description
 
@@ -414,7 +392,7 @@ None
 #### Returns
 Returns true if the client is connected, false if not.
 
-### `stop()`
+### `modbusTCPClient.stop()`
 
 #### Description
 
@@ -435,7 +413,7 @@ Nothing
 
 ## ModbusServer Class
 
-### `configureCoils()`
+### `modbusServer.configureCoils()`
 
 #### Description
 
@@ -455,7 +433,7 @@ int configureCoils(int startAddress, int nb);
 #### Returns
 0 on success, 1 on failure
 
-### `configureDiscreteInputs()`
+### `modbusServer.configureDiscreteInputs()`
 
 #### Description
 
@@ -475,7 +453,7 @@ int configureDiscreteInputs(int startAddress, int nb);
 #### Returns
 0 on success, 1 on failure
 
-### `configureHoldingRegisters()`
+### `modbusServer.configureHoldingRegisters()`
 
 #### Description
 
@@ -495,7 +473,7 @@ int configureHoldingRegisters(int startAddress, int nb);
 #### Returns
 0 on success, 1 on failure
 
-### `configureInputRegisters()`
+### `modbusServer.configureInputRegisters()`
 
 #### Description
 
@@ -515,7 +493,7 @@ int configureInputRegisters(int startAddress, int nb);
 #### Returns
 0 on success, 1 on failure
 
-### `coilRead()`
+### `modbusServer.coilRead()`
 
 #### Description
 
@@ -536,7 +514,7 @@ int coilRead(int id, int address);
 #### Returns
 coil value on success, -1 on failure.
 
-### `discreteInputRead()`
+### `modbusServer.discreteInputRead()`
 
 #### Description
 
@@ -557,7 +535,7 @@ int discreteInputRead(int id, int address);
 #### Returns
 discrete input value on success, -1 on failure.
 
-### `holdingRegisterRead()`
+### `modbusServer.holdingRegisterRead()`
 
 #### Description
 
@@ -575,7 +553,7 @@ long holdingRegisterRead(int id, int address);
 - address start address to use for operation
 - holiding register value on success, -1 on failure.
 
-### `inputRegisterRead()`
+### `modbusServer.inputRegisterRead()`
 
 #### Description
 
@@ -596,7 +574,7 @@ long inputRegisterRead(int id, int address);
 #### Returns
 input register value on success, -1 on failure.
 
-### `coilWrite()`
+### `modbusServer.coilWrite()`
 
 #### Description
 
@@ -618,7 +596,7 @@ int coilWrite(int id, int address, uint8_t value);
 #### Returns
 1 on success, 0 on failure.
 
-### `holdingRegisterWrite()`
+### `modbusServer.holdingRegisterWrite()`
 
 #### Description
 
@@ -640,7 +618,7 @@ int holdingRegisterWrite(int id, int address, uint16_t value);
 #### Returns
 1 on success, 0 on failure.
 
-### `registerMaskWrite()`
+### `modbusServer.registerMaskWrite()`
 
 #### Description
 
@@ -662,7 +640,7 @@ int registerMaskWrite(int id, int address, uint16_t andMask, uint16_t orMask);
 #### Returns
 1 on success, 0 on failure.
 
-### `discreteInputWrite()`
+### `modbusServer.discreteInputWrite()`
 
 #### Description
 
@@ -682,7 +660,7 @@ int discreteInputWrite(int address, uint8_t value);
 #### Returns
 1 on success, 0 on failure.
 
-### `writeDiscreteInputs()`
+### `modbusServer.writeDiscreteInputs()`
 
 #### Description
 
@@ -703,7 +681,7 @@ int writeDiscreteInputs(int address, uint8_t values[], int nb);
 #### Returns
 1 on success, 0 on failure.
 
-### `inputRegisterWrite()`
+### `modbusServer.inputRegisterWrite()`
 
 #### Description
 
@@ -723,7 +701,7 @@ int inputRegisterWrite(int address, uint16_t value);
 #### Returns
 1 on success, 0 on failure.
 
-### `writeInputRegisters()`
+### `modbusServer.writeInputRegisters()`
 
 #### Description
 
@@ -743,7 +721,7 @@ int writeInputRegisters(int address, uint16_t values[], int nb);
 #### Returns
 1 on success, 0 on failure.
 
-### `poll()`
+### `modbusServer.poll()`
 
 #### Description
 
@@ -761,7 +739,7 @@ None
 #### Returns
 nothing
 
-### `end()`
+### `modbusServer.end()`
 
 #### Description
 
@@ -781,7 +759,7 @@ nothing
 
 ## ModbusRTUServer Class
 
-### `begin()`
+### `modbusRTUServer.begin()`
 
 #### Description
 
@@ -819,7 +797,7 @@ ModbusTCPServer();
 #### Parameters
 None
 
-### `begin()`
+### `modbusTCPServer.begin()`
 
 #### Description
 
@@ -839,7 +817,7 @@ modbusTCPserver.begin(id);
 #### Returns
 1 on success, 0 on failure
 
-### `accept()`
+### `modbusTCPServer.accept()`
 
 #### Description
 

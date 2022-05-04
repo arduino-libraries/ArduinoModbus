@@ -23,7 +23,7 @@
 #define htonl(x) bswap_32(x)
 #define htons(x) bswap_16(x)
 #define ntohl(x) bswap_32(x)
-#define ntohs(x) bswap_32(x)
+#define ntohs(x) bswap_16(x)
 #else
 #define htonl(x) (x)
 #define htons(x) (x)

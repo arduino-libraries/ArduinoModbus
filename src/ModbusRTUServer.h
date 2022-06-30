@@ -44,7 +44,7 @@ public:
   /**
    * Poll interface for requests
    */
-  virtual void poll();
+  virtual int poll();
 
 private:
   RS485Class* _rs485 = &RS485;

@@ -61,7 +61,7 @@ long holdingRegisterRead(int id, int address);
 
 - id (slave) - id of target, defaults to 0x00 if not specified
 - address start address to use for operation
-- holiding register value on success, -1 on failure.
+- holding register value on success, -1 on failure.
 
 ### `client.inputRegisterRead()`
 
@@ -167,7 +167,7 @@ int beginTransmission(int id, int type, int address, int nb);
 
 #### Parameters
 - id (slave) - id of target, defaults to 0x00 if not specified
-- type - type of write to perform, either COILS or HOLD_REGISTERS
+- type - type of write to perform, either COILS or HOLDING_REGISTERS
 - address start address to use for operation
 - nb - number of values to write
 
@@ -229,7 +229,7 @@ int requestFrom(int id, int type, int address,int nb);
 
 #### Parameters
 - id (slave) - id of target, defaults to 0x00 if not specified
-type - type of read to perform, either COILS, DISCRETE_INPUTS, HOLD_REGISTERS, or INPUT_REGISTERS
+type - type of read to perform, either COILS, DISCRETE_INPUTS, HOLDING_REGISTERS, or INPUT_REGISTERS
 - address start address to use for operation
 - nb - number of values to read
 
@@ -551,7 +551,7 @@ long holdingRegisterRead(int id, int address);
 #### Parameters
 - id (slave) - id of target, defaults to 0x00 if not specified
 - address start address to use for operation
-- holiding register value on success, -1 on failure.
+- holding register value on success, -1 on failure.
 
 ### `modbusServer.inputRegisterRead()`
 
@@ -835,4 +835,3 @@ modbusTCPserver.accept(client);
 
 #### Returns
 Nothing
-

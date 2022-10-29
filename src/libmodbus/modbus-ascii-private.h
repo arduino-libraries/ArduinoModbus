@@ -5,8 +5,8 @@
  * SPDX-License-Identifier: LGPL-2.1+
  */
 
-#ifndef MODBUS_RTU_PRIVATE_H
-#define MODBUS_RTU_PRIVATE_H
+#ifndef MODBUS_ASCII_PRIVATE_H
+#define MODBUS_ASCII_PRIVATE_H
 
 #ifndef _MSC_VER
 #include <stdint.h>
@@ -22,11 +22,11 @@
 #include <termios.h>
 #endif
 
-#define _MODBUS_RTU_HEADER_LENGTH      1
-#define _MODBUS_RTU_PRESET_REQ_LENGTH  6
-#define _MODBUS_RTU_PRESET_RSP_LENGTH  2
+#define _MODBUS_ASCII_HEADER_LENGTH      1
+#define _MODBUS_ASCII_PRESET_REQ_LENGTH  6
+#define _MODBUS_ASCII_PRESET_RSP_LENGTH  2
 
-#define _MODBUS_RTU_CHECKSUM_LENGTH    2
+#define _MODBUS_ASCII_CHECKSUM_LENGTH    1
 
 #if defined(_WIN32)
 #if !defined(ENOTSUP)
@@ -45,7 +45,7 @@ struct win32_ser {
 };
 #endif /* _WIN32 */
 
-typedef struct _modbus_rtu {
+typedef struct _modbus_ascii {
 #if defined(ARDUINO)
     unsigned long baud;
     RS485_SER_CONF_TYPE config;
@@ -80,6 +80,6 @@ typedef struct _modbus_rtu {
 #endif
     /* To handle many slaves on the same link */
     int confirmation_to_ignore;
-} modbus_rtu_t;
+} modbus_ascii_t;
 
-#endif /* MODBUS_RTU_PRIVATE_H */
+#endif /* MODBUS_ASCII_PRIVATE_H */

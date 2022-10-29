@@ -17,44 +17,33 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#include <errno.h>
+#ifndef _MODBUS_ASCII_CLIENT_H_INCLUDED
+#define _MODBUS_ASCII_CLIENT_H_INCLUDED
 
-extern "C" {
-#include "libmodbus/modbus.h"
-#include "libmodbus/modbus-rtu.h"
-}
+#include "ModbusClient.h"
+#include <ArduinoRS485.h>
 
-#include "ModbusRTUClient.h"
+class ModbusASCIIClientClass : public ModbusClient {
+public:
+  ModbusASCIIClientClass();
+  ModbusASCIIClientClass(RS485Class& rs485);
+  virtual ~ModbusASCIIClientClass();
 
-ModbusRTUClientClass::ModbusRTUClientClass() :
-  ModbusClient(1000)
-{
-}
+  /**
+   * Start the Modbus RTU client with the specified parameters
+   *
+   * @param baudrate Baud rate to use
+   * @param config serial config. to use defaults to SERIAL_8N1
+   *
+   * Return 1 on success, 0 on failure
+   */
+  int begin(unsigned long baudrate, RS485_SER_CONF_TYPE config = SERIAL_8N1);
+  int begin(RS485Class& rs485, unsigned long baudrate, RS485_SER_CONF_TYPE config = SERIAL_8N1);
 
-ModbusRTUClientClass::ModbusRTUClientClass(RS485Class& rs485) :
-  ModbusClient(1000),  _rs485(&rs485)
-{
-}
+private:
+  RS485Class* _rs485 = &RS485;
+};
 
-ModbusRTUClientClass::~ModbusRTUClientClass()
-{
-}
+extern ModbusASCIIClientClass ModbusASCIIClient;
 
-int ModbusRTUClientClass::begin(unsigned long baudrate, RS485_SER_CONF_TYPE config)
-{
-  modbus_t* mb = modbus_new_rtu(_rs485, baudrate, config);
-
-  if (!ModbusClient::begin(mb, 0x00)) {
-    return 0;
-  }
-
-  return 1;
-}
-
-int ModbusRTUClientClass::begin(RS485Class& rs485, unsigned long baudrate, RS485_SER_CONF_TYPE config)
-{
-  _rs485 = &rs485;
-  return begin(baudrate, config);
-}
-
-ModbusRTUClientClass ModbusRTUClient;
+#endif

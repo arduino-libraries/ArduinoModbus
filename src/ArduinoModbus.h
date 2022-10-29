@@ -20,6 +20,8 @@
 #ifndef _ARDUINO_MODBUS_H_INCLUDED
 #define _ARDUINO_MODBUS_H_INCLUDED
 
+#include "ModbusASCIIClient.h"
+
 #include "ModbusRTUClient.h"
 #include "ModbusRTUServer.h"
 

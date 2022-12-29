@@ -51,10 +51,10 @@ jobs:
           - fqbn: arduino:samd:mkrwifi1010
             ethernet: true
             nina: true
-          - fqbn: arduino:mbed:nano33ble
+          - fqbn: arduino:mbed_nano:nano33ble
             ethernet: false
             nina: false
-          - fqbn: arduino:mbed:envie_m7
+          - fqbn: arduino:mbed_portenta:envie_m7
             ethernet: false
             nina: false
 

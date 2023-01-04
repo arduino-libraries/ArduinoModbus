@@ -39,12 +39,6 @@ jobs:
 
       matrix:
         board:
-          - fqbn: arduino:avr:nano
-            ethernet: true
-            nina: false
-          - fqbn: arduino:avr:leonardo
-            ethernet: true
-            nina: false
           - fqbn: arduino:megaavr:uno2018:mode=off
             ethernet: true
             nina: true

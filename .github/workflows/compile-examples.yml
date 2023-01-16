@@ -51,6 +51,9 @@ jobs:
           - fqbn: arduino:mbed_portenta:envie_m7
             ethernet: false
             nina: false
+          - fqbn: arduino:mbed_opta:opta
+            ethernet: true
+            nina: false
 
         # Make board type-specific customizations to the matrix jobs
         include:

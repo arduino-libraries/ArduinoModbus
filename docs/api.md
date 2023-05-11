@@ -229,7 +229,7 @@ int requestFrom(int id, int type, int address,int nb);
 
 #### Parameters
 - id (slave) - id of target, defaults to 0x00 if not specified
-type - type of read to perform, either COILS, DISCRETE_INPUTS, HOLDING_REGISTERS, or INPUT_REGISTERS
+- type - type of read to perform, either COILS, DISCRETE_INPUTS, HOLDING_REGISTERS, or INPUT_REGISTERS
 - address start address to use for operation
 - nb - number of values to read
 

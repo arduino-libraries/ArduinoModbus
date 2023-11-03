@@ -22,9 +22,9 @@ constexpr auto baudrate { 19200 };
 // Paragraph 2.5.1.1 MODBUS Message RTU Framing
 // https://modbus.org/docs/Modbus_over_serial_line_V1_02.pdf
 constexpr auto bitduration { 1.f / baudrate };
-constexpr auto wordlen { 9.6f }; // try also with 10.0f
-constexpr auto preDelayBR { bitduration * wordlen * 3.5f * 1e6 };
-constexpr auto postDelayBR { bitduration * wordlen * 3.5f * 1e6 };
+constexpr auto charlen { 11.0f };
+constexpr auto preDelayBR { bitduration * charlen * 3.5f * 1e6 };
+constexpr auto postDelayBR { bitduration * charlen * 3.5f * 1e6 };
 
 void setup() {
   Serial.begin(9600);

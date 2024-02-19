@@ -735,14 +735,14 @@ Poll for requests
 #### Syntax
 
 ```
-virtual void poll() = 0;
+virtual int poll() = 0;
 ```
 
 #### Parameters
 None
 
 #### Returns
-nothing
+1 on request, 0 on no request
 
 ### `modbusServer.end()`
 

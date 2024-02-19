@@ -42,18 +42,23 @@ jobs:
           - fqbn: arduino:megaavr:uno2018:mode=off
             ethernet: true
             nina: true
+            artifact-name-suffix: arduino-megaavr-uno2018
           - fqbn: arduino:samd:mkrwifi1010
             ethernet: true
             nina: true
+            artifact-name-suffix: arduino-samd-mkrwifi1010
           - fqbn: arduino:mbed_nano:nano33ble
             ethernet: false
             nina: false
+            artifact-name-suffix: arduino-mbed_nano-nano33ble
           - fqbn: arduino:mbed_portenta:envie_m7
             ethernet: false
             nina: false
+            artifact-name-suffix: arduino-mbed_portenta-envie_m7
           - fqbn: arduino:mbed_opta:opta
             ethernet: true
             nina: false
+            artifact-name-suffix: arduino-mbed_opta-opta
 
         # Make board type-specific customizations to the matrix jobs
         include:
@@ -110,5 +115,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           if-no-files-found: error
-          name: ${{ env.SKETCHES_REPORTS_PATH }}
+          name: sketches-report-${{ matrix.board.artifact-name-suffix }}
           path: ${{ env.SKETCHES_REPORTS_PATH }}

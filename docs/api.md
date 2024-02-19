@@ -167,10 +167,11 @@ int beginTransmission(int id, int type, int address, int nb);
 
 #### Parameters
 - id (slave) - id of target, defaults to 0x00 if not specified
-- type - type of write to perform, either COILS or HOLDING_REGISTERS
+- type - type of write to perform, either
+    - COILS (FC 0x01)
+    - HOLDING_REGISTERS (FC 0x03)
 - address start address to use for operation
 - nb - number of values to write
-
 
 #### Returns
 1 on success, 0 on failure
@@ -229,7 +230,11 @@ int requestFrom(int id, int type, int address,int nb);
 
 #### Parameters
 - id (slave) - id of target, defaults to 0x00 if not specified
-- type - type of read to perform, either COILS, DISCRETE_INPUTS, HOLDING_REGISTERS, or INPUT_REGISTERS
+- type - type of read to perform, either 
+    - COILS (FC 0x01)
+    - DISCRETE_INPUTS (FC 0x02)
+    - HOLDING_REGISTERS (FC 0x03)
+    - INPUT_REGISTERS (FC 0x04)
 - address start address to use for operation
 - nb - number of values to read
 

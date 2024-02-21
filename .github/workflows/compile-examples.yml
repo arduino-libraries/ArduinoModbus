@@ -19,15 +19,13 @@ on:
   # See: https://docs.github.com/en/free-pro-team@latest/actions/reference/events-that-trigger-workflows#workflow_dispatch
   workflow_dispatch:
 
-env:
-  SKETCHES_REPORTS_PATH: sketches-reports
-
 jobs:
-  compile:
+  build:
     name: ${{ matrix.board.fqbn }}
     runs-on: ubuntu-latest
 
     env:
+      SKETCHES_REPORTS_PATH: sketches-reports
       # Libraries to install for all boards
       UNIVERSAL_LIBRARIES: |
         # Install the ArduinoModbus library from the local path
@@ -119,18 +117,3 @@ jobs:
           if-no-files-found: error
           name: sketches-report-${{ matrix.board.artifact-name-suffix }}
           path: ${{ env.SKETCHES_REPORTS_PATH }}
-
-  report:
-    needs: compile
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Download sketches reports artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: ${{ env.SKETCHES_REPORTS_PATH }}
-
-      - uses: arduino/report-size-deltas@v1
-        with:
-          sketches-reports-source: ${{ env.SKETCHES_REPORTS_PATH }}

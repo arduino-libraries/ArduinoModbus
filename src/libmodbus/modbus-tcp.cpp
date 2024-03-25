@@ -844,6 +844,9 @@ static int _modbus_tcp_select(modbus_t *ctx, fd_set *rset, struct timeval *tv, i
         if (s_rc >= length_to_read) {
             break;
         }
+        #ifdef INCLUDE_vTaskDelay
+            vTaskDelay(1);
+        #endif
     } while ((millis() - start) < wait_time_millis && ctx_tcp->client->connected());
 #else
     while ((s_rc = select(ctx->s+1, rset, NULL, NULL, tv)) == -1) {

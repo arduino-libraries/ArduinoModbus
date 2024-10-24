@@ -11,6 +11,8 @@ ModbusRTUClient	KEYWORD1
 ModbusRTUServer	KEYWORD1
 ModbusRTUClient	KEYWORD1
 ModbusTCPServer	KEYWORD1
+ModbusT1SClient	KEYWORD1
+ModbusT1SServer	KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)

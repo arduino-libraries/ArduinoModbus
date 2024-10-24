@@ -26,4 +26,7 @@
 #include "ModbusTCPClient.h"
 #include "ModbusTCPServer.h"
 
+#include "ModbusT1SClient.h"
+#include "ModbusT1SServer.h"
+
 #endif

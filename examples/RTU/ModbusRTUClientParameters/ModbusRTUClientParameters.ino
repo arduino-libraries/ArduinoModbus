@@ -22,8 +22,6 @@ void setup() {
 
   Serial.println("Modbus RTU Client Toggle w/ Parameters");
 
-  RS485.setDelays(ModbusRTUDelay::preDelay(baudrate), ModbusRTUDelay::postDelay(baudrate));
-
   // start the Modbus RTU client in 8E1 mode
   if (!ModbusRTUClient.begin(baudrate, SERIAL_8E1)) {
     Serial.println("Failed to start Modbus RTU Client!");

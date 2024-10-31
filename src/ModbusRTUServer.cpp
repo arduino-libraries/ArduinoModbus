@@ -26,6 +26,9 @@ extern "C" {
 
 #include "ModbusRTUServer.h"
 
+#include "ModbusRTUDelay.h"
+
+
 ModbusRTUServerClass::ModbusRTUServerClass()
 {
 }
@@ -40,6 +43,8 @@ ModbusRTUServerClass::~ModbusRTUServerClass()
 
 int ModbusRTUServerClass::begin(int id, unsigned long baudrate, uint16_t config)
 {
+  _rs485->setDelays(ModbusRTUDelay::preDelay(baudrate), ModbusRTUDelay::postDelay(baudrate));
+
   modbus_t* mb = modbus_new_rtu(_rs485, baudrate, config);
 
   if (!ModbusServer::begin(mb, id)) {

@@ -7,6 +7,7 @@
 #######################################
 
 ArduinoModbus	KEYWORD1
+ModbusRTUDelay	KEYWORD1
 ModbusRTUClient	KEYWORD1
 ModbusRTUServer	KEYWORD1
 ModbusRTUClient	KEYWORD1
@@ -20,6 +21,9 @@ begin	KEYWORD2
 poll	KEYWORD2
 end	KEYWORD2
 setTimeout	KEYWORD2
+
+preDelay	KEYWORD2
+postDelay	KEYWORD2
 
 beginTransmission	KEYWORD2
 write	KEYWORD2

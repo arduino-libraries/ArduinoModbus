@@ -20,6 +20,7 @@
 #ifndef _ARDUINO_MODBUS_H_INCLUDED
 #define _ARDUINO_MODBUS_H_INCLUDED
 
+#include "ModbusRTUDelay.h"
 #include "ModbusRTUClient.h"
 #include "ModbusRTUServer.h"
 

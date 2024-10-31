@@ -16,23 +16,13 @@
 
 constexpr auto baudrate { 19200 };
 
-// Calculate preDelay and postDelay in microseconds as per Modbus RTU Specification
-//
-// MODBUS over serial line specification and implementation guide V1.02
-// Paragraph 2.5.1.1 MODBUS Message RTU Framing
-// https://modbus.org/docs/Modbus_over_serial_line_V1_02.pdf
-constexpr auto bitduration { 1.f / baudrate };
-constexpr auto wordlen { 9.6f }; // try also with 10.0f
-constexpr auto preDelayBR { bitduration * wordlen * 3.5f * 1e6 };
-constexpr auto postDelayBR { bitduration * wordlen * 3.5f * 1e6 };
-
 void setup() {
   Serial.begin(9600);
   while (!Serial);
 
   Serial.println("Modbus RTU Client Toggle w/ Parameters");
 
-  RS485.setDelays(preDelayBR, postDelayBR);
+  RS485.setDelays(ModbusRTUDelay::preDelay(baudrate), ModbusRTUDelay::postDelay(baudrate));
 
   // start the Modbus RTU client in 8E1 mode
   if (!ModbusRTUClient.begin(baudrate, SERIAL_8E1)) {

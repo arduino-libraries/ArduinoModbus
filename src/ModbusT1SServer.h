@@ -25,10 +25,21 @@
 #include <ArduinoRS485.h>
 #include <Arduino_10BASE_T1S.h>
 #include "ModbusRTUClient.h"
+#include "ModbusT1SCommon.h"
 #include <SPI.h>
 
-
-
+// valutare meglio dove metterla
+#define RS485_SERIAL Serial1
+#define RS485_TX_PIN 1
+#define RS485_RX_PIN 0
+#define RS485_DE_PIN 8
+#define RS485_RE_PIN 7
+#define PRE_DELAY    100
+#define POST_DELAY   100
+#define PWR_CARRIER_RATIO  0.18f
+  
+static void OnPlcaStatus_server(bool success, bool plcaStatus);
+using callback_f = void (*)(bool, bool);
 class ModbusT1SServerClass : public ModbusServer {
 public:
   /**
@@ -56,7 +67,7 @@ public:
   int begin(int id, unsigned long baudrate, uint16_t config = SERIAL_8N1);
   int begin(RS485Class& rs485, int id, unsigned long baudrate, uint16_t config = SERIAL_8N1);
   int begin(RS485Class& rs485, unsigned long baudrate, uint16_t config = SERIAL_8N1);
-
+  int begin(int node_id);
   /**
    * Reads a coil from the Modbus server.
    *
@@ -142,17 +153,31 @@ public:
    */
   void setT1SServer(Arduino_10BASE_T1S_UDP * server);
 
+  void setT1SPort(int port = 8889);
+
+  void update();
+
+  void setBadrate(int baudrate);
+
+
   /**
    * Poll interface for requests
    */
   virtual int poll();
+  void checkPLCAStatus();
+  void setCallback(callback_f cb = nullptr);
+
 
 private:
+  callback_f callback = nullptr;
   RS485Class* _rs485 = &RS485;
   std::vector<uint8_t> udp_rx_buf;
   Arduino_10BASE_T1S_UDP * _server = nullptr;
   IPAddress _last_ip;
   uint16_t _last_port;
+  int _baudrate = 9600;
+  int _node_id = 1;
+  int udp_port = 0;
 };
 //Arduino_10BASE_T1S_UDP udp_server;
 extern ModbusT1SServerClass ModbusT1SServer;

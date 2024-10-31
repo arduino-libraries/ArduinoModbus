@@ -27,6 +27,7 @@ extern "C" {
 #include "ModbusT1SServer.h"
 
 size_t const UDP_RX_MSG_BUF_SIZE = 16 + 1;
+RS485Class serial485(RS485_SERIAL, RS485_TX_PIN, RS485_DE_PIN, RS485_RE_PIN);
 
 /**
  * @class ModbusT1SServerClass
@@ -108,10 +109,72 @@ int ModbusT1SServerClass::begin(RS485Class& rs485, unsigned long baudrate, uint1
 {
   _rs485 = &rs485;
   if(!ModbusRTUClient.begin(rs485, baudrate, config)) {
-    return -1;
+    return 0;
+  }
+  return 1;
+}
+
+
+int ModbusT1SServerClass::begin(int node_id)
+{
+  _node_id = node_id;
+  pinMode(IRQ_PIN, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(IRQ_PIN),
+
+  []() {
+    tc6_io->onInterrupt();
+  },
+  FALLING);
+
+  /* Initialize IO module. */
+  if (!tc6_io->begin())
+  {
+    return 0;
+  }
+
+  IPAddress ip_addr = IPAddress(192, 168,  42, 100 + _node_id);
+  IPAddress network_mask = IPAddress(255, 255, 255, 0);
+  IPAddress gateway = IPAddress(192, 168,  42, 100);
+
+  T1SPlcaSettings t1s_plca_settings {
+    _node_id
+  };
+  T1SMacSettings const t1s_default_mac_settings;
+  MacAddress const mac_addr = MacAddress::create_from_uid();
+
+  if (!tc6_inst->begin(ip_addr
+                       , network_mask
+                       , gateway
+                       , mac_addr
+                       , t1s_plca_settings
+                       , t1s_default_mac_settings))
+  {
+    return 0;
+  }
+
+  Serial.print("IP\t");
+  Serial.println(ip_addr);
+  Serial.println(mac_addr);
+  Serial.println(t1s_plca_settings);
+  Serial.println(t1s_default_mac_settings);
+
+  if (!_server->begin(udp_port))
+  {
+    return 0;
+  }
+
+  float MODBUS_BIT_DURATION  = 1.f / _baudrate;
+  float MODBUS_PRE_DELAY_BR  = MODBUS_BIT_DURATION * 9.6f * 3.5f * 1e6;
+  float MODBUS_POST_DELAY_BR = MODBUS_BIT_DURATION * 9.6f * 3.5f * 1e6;
+
+  serial485.setDelays(MODBUS_PRE_DELAY_BR, MODBUS_POST_DELAY_BR);
+
+  if(!ModbusRTUClient.begin(serial485, (unsigned long) _baudrate, (uint16_t) SERIAL_8N1)) {
+    return 0;
   }
 
   ModbusRTUClient.setTimeout(2*1000UL);
+
   return 1;
 }
 
@@ -250,7 +313,6 @@ long ModbusT1SServerClass::inputRegisterRead(int address)
   if(_server == nullptr) {
     return res;
   }
-
   int modbus_id =  udp_rx_buf.at(2) << 8 |  udp_rx_buf.at(3);
   int address_mod =  udp_rx_buf.at(4) << 8 |  udp_rx_buf.at(5);
   if(address != -1) {
@@ -371,6 +433,67 @@ int ModbusT1SServerClass::parsePacket() {
   return res;
 }
 
+void ModbusT1SServerClass::checkPLCAStatus()
+{
+  tc6_inst->service();
+
+  static unsigned long prev_beacon_check = 0;
+  static unsigned long prev_udp_packet_sent = 0;
+
+  auto const now = millis();
+
+  if ((now - prev_beacon_check) > 1000)
+  {
+    prev_beacon_check = now;
+    if(callback == nullptr)
+    {
+      if (!tc6_inst->getPlcaStatus(OnPlcaStatus_server)) {
+        Serial.println("getPlcaStatus(...) failed");
+      }
+    } else {
+      if (!tc6_inst->getPlcaStatus(callback)) {
+        Serial.println("getPlcaStatus(...) failed");
+      }
+    }
+  }
+}
+
+void ModbusT1SServerClass::update() {
+  /* Services the hardware and the protocol stack.
+     Must be called cyclic. The faster the better.
+  */
+  checkPLCAStatus();
+  switch (ModbusT1SServer.parsePacket())
+  {
+    case UDP_READ_COIL_PORT:
+      ModbusT1SServer.coilRead();
+      break;
+
+    case UDP_WRITE_COIL_PORT:
+      ModbusT1SServer.coilWrite();
+      break;
+
+    case UDP_READ_DI_PORT:
+      discreteInputRead();
+      break;
+
+    case UDP_READ_IR_PORT:
+      inputRegisterRead();
+      break;
+
+    case UDP_READ_HR_PORT:
+      holdingRegisterRead();
+      break;
+
+    case UDP_WRITE_HR_PORT:
+      holdingRegisterWrite();
+      break;
+
+    default:
+      break;
+  }
+}
+
 /**
  * Sets the Arduino_10BASE_T1S_UDP server for communication.
  *
@@ -380,6 +503,36 @@ int ModbusT1SServerClass::parsePacket() {
  */
 void ModbusT1SServerClass::setT1SServer(Arduino_10BASE_T1S_UDP * server) {
   _server = server;
+}
+
+
+void ModbusT1SServerClass::setT1SPort(int port) {
+  udp_port = port;
+}
+void ModbusT1SServerClass::setBadrate(int baudrate) {
+  _baudrate = baudrate;
+}
+
+void ModbusT1SServerClass::setCallback(callback_f cb) {
+  if(cb != nullptr) {
+    callback = cb;
+  }
+}
+
+static void OnPlcaStatus_server(bool success, bool plcaStatus)
+{
+  if (!success)
+  {
+    Serial.println("PLCA status register read failed");
+    return;
+  }
+
+  if (plcaStatus) {
+    Serial.println("PLCA Mode active");
+  } else {
+    Serial.println("CSMA/CD fallback");
+    tc6_inst->enablePlca();
+  }
 }
 
 ModbusT1SServerClass ModbusT1SServer;

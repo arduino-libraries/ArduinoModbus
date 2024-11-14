@@ -16,7 +16,7 @@
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
-
+ 
 #if (defined(ARDUINO_UNOR4_WIFI) || defined(ARDUINO_UNOR4_MINIMA))
 #include <errno.h>
 
@@ -26,8 +26,6 @@ extern "C" {
 }
 
 #include "ModbusT1SClient.h"
-
-size_t const UDP_RX_MSG_BUF_SIZE = 16 + 1;
 
 /**
  * @class ModbusT1SClientClass
@@ -42,7 +40,8 @@ size_t const UDP_RX_MSG_BUF_SIZE = 16 + 1;
  * Initializes the Modbus client with a default timeout of 1000 milliseconds.
  */
 ModbusT1SClientClass::ModbusT1SClientClass() :
-  ModbusClient(1000)
+  ModbusClient(1000),
+  callback(default_OnPlcaStatus)
 {
 }
 
@@ -68,22 +67,6 @@ ModbusT1SClientClass::~ModbusT1SClientClass()
 {
 }
 
-/**
- * Initializes the Modbus client with the specified RS485 instance, baud rate, and configuration.
- *
- * This function sets up the Modbus client for communication using the specified RS485 instance, baud rate, and configuration.
- *
- * @param rs485 Reference to an RS485Class object for RS485 communication.
- * @param baudrate The baud rate for the Modbus communication.
- * @param config The configuration for the Modbus communication (e.g., parity, stop bits).
- * @return int Returns 1 if initialization is successful, 0 otherwise.
- */
-int ModbusT1SClientClass::begin(RS485Class& rs485, unsigned long baudrate, uint16_t config)
-{
-  _rs485 = &rs485;
-  return begin(baudrate, config);
-}
-
 int ModbusT1SClientClass::begin(int node_id)
 {
   _node_id = node_id;
@@ -100,16 +83,22 @@ int ModbusT1SClientClass::begin(int node_id)
   {
     return 0;
   }
+  //RRR ADD set IPs
+  if(_gateway == IPAddress(0, 0, 0, 0)) {
+    _gateway = IPAddress(192, 168, 42, 100);
+  }
 
-  IPAddress ip_addr = IPAddress(192, 168,  42, 100 + _node_id);
+  IPAddress ip_addr = IPAddress(_gateway[0], _gateway[1], _gateway[2], _gateway[3] + _node_id);
   IPAddress network_mask = IPAddress(255, 255, 255, 0);
-  IPAddress gateway = IPAddress(192, 168,  42, 100);
-  IPAddress server_addr = IPAddress(192, 168,  42, 100);
-  _server_ip = server_addr;
+  IPAddress gateway = IPAddress(_gateway[0], _gateway[1], _gateway[2], _gateway[3]);
+  IPAddress server_addr = IPAddress(_gateway[0], _gateway[1], _gateway[2], _gateway[3]);
 
-  T1SPlcaSettings t1s_plca_settings {
-    _node_id
-  };
+  if(_server_ip == IPAddress(0, 0, 0, 0)) {
+    _server_ip = server_addr;
+  }
+
+
+  T1SPlcaSettings t1s_plca_settings(_node_id);
 
   T1SMacSettings const t1s_default_mac_settings;
   MacAddress const mac_addr = MacAddress::create_from_uid();
@@ -123,12 +112,6 @@ int ModbusT1SClientClass::begin(int node_id)
   {
     return 0;
   }
-
-  Serial.print("IP\t");
-  Serial.println(ip_addr);
-  Serial.println(mac_addr);
-  Serial.println(t1s_plca_settings);
-  Serial.println(t1s_default_mac_settings);
 
   if (!_client->begin(udp_port))
   {
@@ -195,35 +178,9 @@ void ModbusT1SClientClass::setRxTimeout(unsigned long timeout)
  * @param port The port number to use for the communication.
  * @return int The status of the coil (1 for ON, 0 for OFF) or -1 if an error occurs.
  */
-int ModbusT1SClientClass::coilRead(int address, Arduino_10BASE_T1S_UDP * client, int port)
+int ModbusT1SClientClass::coilRead(int address, Arduino_10BASE_T1S_UDP * client)
 {
-  int res = -1;
-  if(client != nullptr) {
-    _client = client;
-  }
-
-  int _port = port;
-  if(port == -1) {
-    _port = UDP_READ_COIL_PORT;
-  }
-
-  uint8_t tx_buf[6] = {(uint8_t)(_port & 0xFF00) >> 8, (uint8_t)(_port & 0x00FF),
-                                           (uint8_t)((_modbus_id & 0xFF00) >> 8), (uint8_t)_modbus_id,
-                                              (uint8_t)((address & 0xFF00) >> 8), (uint8_t)address};
-  int tx_packet_size = sizeof(tx_buf);
-  write(tx_buf, tx_packet_size, _client);
-  unsigned long start = millis();
-  while(millis() - start < _rx_timeout) {
-    if(read(_client) > 0) {
-      if(checkPacket(_port, _modbus_id, address)) {
-        res = int(udp_rx_buf.at(6));
-        udp_rx_buf.erase(udp_rx_buf.begin(), udp_rx_buf.end());
-        break;
-      }
-      udp_rx_buf.erase(udp_rx_buf.begin(), udp_rx_buf.end());
-    }
-  }
-  return res;
+  return coilRead(_modbus_id, address, client);
 }
 
 /**
@@ -238,35 +195,9 @@ int ModbusT1SClientClass::coilRead(int address, Arduino_10BASE_T1S_UDP * client,
  * @param port The port number to use for the communication.
  * @return int The status of the coil (1 for ON, 0 for OFF) or -1 if an error occurs.
  */
-int ModbusT1SClientClass::coilRead(int id, int address, Arduino_10BASE_T1S_UDP * client, int port)
+int ModbusT1SClientClass::coilRead(int id, int address, Arduino_10BASE_T1S_UDP * client)
 {
-  int res = -1;
-  if(client != nullptr) {
-    _client = client;
-  }
-
-  int _port = port;
-  if(port == -1) {
-    _port = UDP_READ_COIL_PORT;
-  }
-
-  uint8_t tx_buf[6] = {(uint8_t)(_port & 0xFF00) >> 8, (uint8_t)(_port & 0x00FF),
-                                           (uint8_t)((id & 0xFF00) >> 8), (uint8_t)id,
-                                              (uint8_t)((address & 0xFF00) >> 8), (uint8_t)address};
-  int tx_packet_size = sizeof(tx_buf);
-  write(tx_buf, tx_packet_size, _client);
-  unsigned long start = millis();
-  while(millis() - start < _rx_timeout) {
-    if(read(_client)) {
-      if(checkPacket(_port, id, address)) {
-        res = int(udp_rx_buf.at(6));
-        udp_rx_buf.erase(udp_rx_buf.begin(), udp_rx_buf.end());
-        break;
-      }
-      udp_rx_buf.erase(udp_rx_buf.begin(), udp_rx_buf.end());
-    }
-  }
-  return res;
+  return receive(id, address, client, UDP_READ_COIL_PORT);
 }
 
 /**
@@ -281,23 +212,9 @@ int ModbusT1SClientClass::coilRead(int id, int address, Arduino_10BASE_T1S_UDP *
  * @param port The port number to use for the communication.
  * @return int 1 if the write operation is successful, -1 if an error occurs.
  */
-int ModbusT1SClientClass::coilWrite(int address, uint8_t value, Arduino_10BASE_T1S_UDP * client, int port)
+int ModbusT1SClientClass::coilWrite(int address, uint16_t value, Arduino_10BASE_T1S_UDP * client)
 {
-  if(client != nullptr) {
-    _client = client;
-  }
-
-  int _port = port;
-  if(port == -1) {
-    _port = UDP_WRITE_COIL_PORT;
-  }
-
-  uint8_t tx_buf[7] = {(uint8_t)(_port & 0xFF00) >> 8, (uint8_t)(_port & 0x00FF),
-                                      (uint8_t)((_modbus_id & 0xFF00) >> 8), (uint8_t)_modbus_id,
-                                               (uint8_t)((address & 0xFF00) >> 8), (uint8_t)address, value};
-  int tx_packet_size = sizeof(tx_buf);
-  write(tx_buf, tx_packet_size, _client);
-  return 1;
+  return coilWrite(_modbus_id, address, value, client);
 }
 
 /**
@@ -313,23 +230,9 @@ int ModbusT1SClientClass::coilWrite(int address, uint8_t value, Arduino_10BASE_T
  * @param port The port number to use for the communication.
  * @return int 1 if the write operation is successful, -1 if an error occurs.
  */
-int ModbusT1SClientClass::coilWrite(int id, int address, uint8_t value, Arduino_10BASE_T1S_UDP * client, int port)
+int ModbusT1SClientClass::coilWrite(int id, int address, uint16_t value, Arduino_10BASE_T1S_UDP * client)
 {
-  if(client != nullptr) {
-    _client = client;
-  }
-
-
-  int _port = port;
-  if(port == -1) {
-    _port = UDP_WRITE_COIL_PORT;
-  }
-
-  uint8_t tx_buf[7] = {(uint8_t)(_port & 0xFF00) >> 8, (uint8_t)(_port & 0x00FF), (uint8_t)((id & 0xFF00) >> 8), (uint8_t)id,
-                                          (uint8_t)((address & 0xFF00) >> 8), (uint8_t)address, value};
-  int tx_packet_size = sizeof(tx_buf);
-  write(tx_buf, tx_packet_size, _client);
-  return 1;
+  return send(id, address, value, client, UDP_WRITE_COIL_PORT);
 }
 
 /**
@@ -343,35 +246,9 @@ int ModbusT1SClientClass::coilWrite(int id, int address, uint8_t value, Arduino_
  * @param port The port number to use for the communication.
  * @return int The status of the discrete input (1 for ON, 0 for OFF) or -1 if an error occurs.
  */
-int ModbusT1SClientClass::discreteInputRead(int address, Arduino_10BASE_T1S_UDP * client, int port)
+int ModbusT1SClientClass::discreteInputRead(int address, Arduino_10BASE_T1S_UDP * client)
 {
-  int res = -1;
-  if(client != nullptr) {
-    _client = client;
-  }
-
-  int _port = port;
-  if(port == -1) {
-    _port = UDP_READ_DI_PORT;
-  }
-
-  uint8_t tx_buf[6] = {(uint8_t)(_port & 0xFF00) >> 8, (uint8_t)(_port & 0x00FF),
-                                           (uint8_t)((_modbus_id & 0xFF00) >> 8), (uint8_t)_modbus_id,
-                                              (uint8_t)((address & 0xFF00) >> 8), (uint8_t)address};
-  int tx_packet_size = sizeof(tx_buf);
-  write(tx_buf, tx_packet_size, _client);
-  unsigned long start = millis();
-  while(millis() - start < _rx_timeout) {
-    if(read(_client)) {
-      if(checkPacket(_port, _modbus_id, address)) {
-        res = int(udp_rx_buf.at(6));
-        udp_rx_buf.erase(udp_rx_buf.begin(), udp_rx_buf.end());
-        break;
-      }
-      udp_rx_buf.erase(udp_rx_buf.begin(), udp_rx_buf.end());
-    }
-  }
-  return res;
+  return discreteInputRead(_modbus_id, address, client);
 }
 
 /**
@@ -386,35 +263,9 @@ int ModbusT1SClientClass::discreteInputRead(int address, Arduino_10BASE_T1S_UDP 
  * @param port The port number to use for the communication.
  * @return int The status of the discrete input (1 for ON, 0 for OFF) or -1 if an error occurs.
  */
-int ModbusT1SClientClass::discreteInputRead(int id, int address, Arduino_10BASE_T1S_UDP * client, int port)
+int ModbusT1SClientClass::discreteInputRead(int id, int address, Arduino_10BASE_T1S_UDP * client)
 {
-  int res = -1;
-  if(client != nullptr) {
-    _client = client;
-  }
-
-  int _port = port;
-  if(port == -1) {
-    _port = UDP_READ_DI_PORT;
-  }
-
-  uint8_t tx_buf[6] = {(uint8_t)(_port & 0xFF00) >> 8, (uint8_t)(_port & 0x00FF),
-                                           (uint8_t)((id & 0xFF00) >> 8), (uint8_t)id,
-                                              (uint8_t)((address & 0xFF00) >> 8), (uint8_t)address};
-  int tx_packet_size = sizeof(tx_buf);
-  write(tx_buf, tx_packet_size, _client);
-  unsigned long start = millis();
-  while(millis() - start < _rx_timeout) {
-    if(read(_client)) {
-      if(checkPacket(_port, id, address)) {
-        res = int(udp_rx_buf.at(6));
-        udp_rx_buf.erase(udp_rx_buf.begin(), udp_rx_buf.end());
-        break;
-      }
-      udp_rx_buf.erase(udp_rx_buf.begin(), udp_rx_buf.end());
-    }
-  }
-  return res;
+  return receive(id, address, client, UDP_READ_DI_PORT);
 }
 
 /**
@@ -428,35 +279,9 @@ int ModbusT1SClientClass::discreteInputRead(int id, int address, Arduino_10BASE_
  * @param port The port number to use for the communication.
  * @return long The value of the input register or -1 if an error occurs.
  */
-long ModbusT1SClientClass::inputRegisterRead(int address, Arduino_10BASE_T1S_UDP * client, int port)
+long ModbusT1SClientClass::inputRegisterRead(int address, Arduino_10BASE_T1S_UDP * client)
 {
-  long res = -1;
-  if(client != nullptr) {
-    _client = client;
-  }
-
-  int _port = port;
-  if(port == -1) {
-    _port = UDP_READ_IR_PORT;
-  }
-
-  uint8_t tx_buf[6] = {(uint8_t)(_port & 0xFF00) >> 8, (uint8_t)(_port & 0x00FF),
-                                           (uint8_t)((_modbus_id & 0xFF00) >> 8), (uint8_t)_modbus_id,
-                                              (uint8_t)((address & 0xFF00) >> 8), (uint8_t)address};
-  int tx_packet_size = sizeof(tx_buf);
-  write(tx_buf, tx_packet_size, _client);
-  unsigned long start = millis();
-  while(millis() - start < _rx_timeout) {
-    if(read(_client)) {
-      if(checkPacket(_port, _modbus_id, address)) {
-        res = int(udp_rx_buf.at(6) << 8 | udp_rx_buf.at(7));
-        udp_rx_buf.erase(udp_rx_buf.begin(), udp_rx_buf.end());
-        break;
-      }
-      udp_rx_buf.erase(udp_rx_buf.begin(), udp_rx_buf.end());
-    }
-  }
-  return res;
+  return inputRegisterRead(_modbus_id, address, client);
 }
 
 /**
@@ -471,35 +296,9 @@ long ModbusT1SClientClass::inputRegisterRead(int address, Arduino_10BASE_T1S_UDP
  * @param port The port number to use for the communication.
  * @return long The value of the input register or -1 if an error occurs.
  */
-long ModbusT1SClientClass::inputRegisterRead(int id, int address, Arduino_10BASE_T1S_UDP * client, int port)
+long ModbusT1SClientClass::inputRegisterRead(int id, int address, Arduino_10BASE_T1S_UDP * client)
 {
-  long res = -1;
-  if(client != nullptr) {
-    _client = client;
-  }
-
-  int _port = port;
-  if(port == -1) {
-    _port = UDP_READ_IR_PORT;
-  }
-
-  uint8_t tx_buf[6] = {(uint8_t)(_port & 0xFF00) >> 8, (uint8_t)(_port & 0x00FF),
-                                           (uint8_t)((id & 0xFF00) >> 8), (uint8_t)id,
-                                              (uint8_t)((address & 0xFF00) >> 8), (uint8_t)address};
-  int tx_packet_size = sizeof(tx_buf);
-  write(tx_buf, tx_packet_size, _client);
-  unsigned long start = millis();
-  while(millis() - start < _rx_timeout) {
-    if(read(_client) > 0) {
-      if(checkPacket(_port, id, address)) {
-        res = int(udp_rx_buf.at(6) << 8 | udp_rx_buf.at(7));
-        udp_rx_buf.erase(udp_rx_buf.begin(), udp_rx_buf.end());
-        break;
-      }
-      udp_rx_buf.erase(udp_rx_buf.begin(), udp_rx_buf.end());
-    }
-  }
-  return res;
+  return receive(id, address, client, UDP_READ_IR_PORT);
 }
 
 /**
@@ -513,35 +312,9 @@ long ModbusT1SClientClass::inputRegisterRead(int id, int address, Arduino_10BASE
  * @param port The port number to use for the communication.
  * @return Returns the value of the holding register on success, or -1 if the client is null.
  */
-long ModbusT1SClientClass::holdingRegisterRead(int address, Arduino_10BASE_T1S_UDP * client, int port)
+long ModbusT1SClientClass::holdingRegisterRead(int address, Arduino_10BASE_T1S_UDP * client)
 {
-  long res = -1;
-  if(client != nullptr) {
-    _client = client;
-  }
-  
-  int _port = port;
-  if(port == -1) {
-    _port = UDP_READ_HR_PORT;
-  }
-  uint8_t tx_buf[6] = {(uint8_t)(_port & 0xFF00) >> 8, (uint8_t)(_port & 0x00FF),
-                                           (uint8_t)((_modbus_id & 0xFF00) >> 8), (uint8_t)_modbus_id,
-                                              (uint8_t)((address & 0xFF00) >> 8), (uint8_t)address};
-  int tx_packet_size = sizeof(tx_buf);
-  write(tx_buf, tx_packet_size, client);
-  unsigned long start = millis();
-  while(millis() - start < _rx_timeout) {
-    int const rx_packet_size = _client->parsePacket();
-    if(read(_client)) {
-      if(checkPacket(_port, _modbus_id, address)) {
-        res = int(udp_rx_buf.at(6) << 8 | udp_rx_buf.at(7));
-        udp_rx_buf.erase(udp_rx_buf.begin(), udp_rx_buf.end());
-        break;
-      }
-      udp_rx_buf.erase(udp_rx_buf.begin(), udp_rx_buf.end());
-    }
-  }
-  return res;
+  return holdingRegisterRead(_modbus_id, address, client);
 }
 
 /**
@@ -557,37 +330,11 @@ long ModbusT1SClientClass::holdingRegisterRead(int address, Arduino_10BASE_T1S_U
  * @param port The port number to use for the communication.
  * @return Returns 1 on success, or -1 if the client is null.
  */
-long ModbusT1SClientClass::holdingRegisterRead(int id, int address, Arduino_10BASE_T1S_UDP * client, int port)
+long ModbusT1SClientClass::holdingRegisterRead(int id, int address, Arduino_10BASE_T1S_UDP * client)
 {
-  long res = -1;
-  if(client != nullptr) {
-    _client = client;
-  }
-
-  int _port = port;
-  if(port == -1) {
-    _port = UDP_READ_HR_PORT;
-  }
-
-  uint8_t tx_buf[6] = {(uint8_t)(_port & 0xFF00) >> 8, (uint8_t)(_port & 0x00FF),
-                                           (uint8_t)((id & 0xFF00) >> 8), (uint8_t)(id & 0x00FF),
-                                              (uint8_t)((address & 0xFF00) >> 8), (uint8_t)address};
-
-  int tx_packet_size = sizeof(tx_buf);
-  write(tx_buf, tx_packet_size, _client);
-  unsigned long start = millis();
-  while(millis() - start < _rx_timeout) {
-    if(read(_client)) {
-      if(checkPacket(_port, id, address)) {
-        res = int(udp_rx_buf.at(6) << 8 | udp_rx_buf.at(7));
-        udp_rx_buf.erase(udp_rx_buf.begin(), udp_rx_buf.end());
-        break;
-      }
-      udp_rx_buf.erase(udp_rx_buf.begin(), udp_rx_buf.end());
-    }
-  }
-  return res;
+  return receive(id, address, client, UDP_READ_HR_PORT);
 }
+
 
 /**
  * Writes a value to a holding register on the Modbus server.
@@ -600,23 +347,9 @@ long ModbusT1SClientClass::holdingRegisterRead(int id, int address, Arduino_10BA
  * @param client A pointer to the Arduino_10BASE_T1S_UDP client used for communication.
  * @return int 1 if the write operation is successful, -1 if an error occurs.
  */
-int ModbusT1SClientClass::holdingRegisterWrite(int address, uint16_t value, Arduino_10BASE_T1S_UDP * client, int port)
+int ModbusT1SClientClass::holdingRegisterWrite(int address, uint16_t value, Arduino_10BASE_T1S_UDP * client)
 {
-  if(client != nullptr) {
-    _client = client;
-  }
-
-    int _port = port;
-  if(port == -1) {
-    _port = UDP_WRITE_HR_PORT;
-  }
-
-  uint8_t tx_buf[8] = {(uint8_t)(_port & 0xFF00) >> 8, (uint8_t)(_port & 0x00FF),
-                                           (uint8_t)((_modbus_id & 0xFF00) >> 8), (uint8_t)_modbus_id,
-                                              (uint8_t)((address & 0xFF00) >> 8), (uint8_t)address, (uint8_t)((value & 0xFF00) >> 8), (uint8_t)(value & 0x00FF)};
-  int tx_packet_size = sizeof(tx_buf);
-  write(tx_buf, tx_packet_size, _client);
-  return 1;
+  return holdingRegisterWrite(_modbus_id, address, value, client);
 }
 
 /**
@@ -632,64 +365,91 @@ int ModbusT1SClientClass::holdingRegisterWrite(int address, uint16_t value, Ardu
  * @param port The port number to use for the communication.
  * @return Returns 1 on success, or -1 if the client is null.
  */
-int ModbusT1SClientClass::holdingRegisterWrite(int id, int address, uint16_t value, Arduino_10BASE_T1S_UDP * client, int port)
+int ModbusT1SClientClass::holdingRegisterWrite(int id, int address, uint16_t value, Arduino_10BASE_T1S_UDP * client)
 {
-  if(client != nullptr) {
-    _client = client;
+  return send(id, address, value, client, UDP_WRITE_HR_PORT);
+}
+
+long ModbusT1SClientClass::receive(int id, int address, Arduino_10BASE_T1S_UDP * client, int functionCode) {
+
+  long res = -1;
+  if(client == nullptr) {
+    client = _client;
   }
 
-  int _port = port;
-  if(port == -1) {
-    _port = UDP_WRITE_HR_PORT;
+  uint8_t tx_buf[8] = {(uint8_t)(functionCode & 0xFF00) >> 8, (uint8_t)(functionCode & 0x00FF),
+                                           (uint8_t)((id & 0xFF00) >> 8), (uint8_t)id,
+                                              (uint8_t)((address & 0xFF00) >> 8), (uint8_t)address};
+  int tx_packet_size = sizeof(tx_buf);
+  write(tx_buf, tx_packet_size, client);
+  unsigned long start = millis();
+  while(millis() - start < _rx_timeout) {
+    if(read(client)) {
+      if(checkPacket(functionCode, id, address)) {
+        switch (functionCode) {
+          case UDP_READ_IR_PORT:
+          case UDP_READ_HR_PORT:
+            res = int(udp_rx_buf[6] << 8 | udp_rx_buf[7]);
+            return res;
+          case UDP_READ_COIL_PORT:
+          case UDP_READ_DI_PORT:
+            res = int(udp_rx_buf[7]);
+            return res;
+          default:
+            break;
+        }
+      }
+    }
+  }
+  return res;
+}
+
+int ModbusT1SClientClass::send(int id, int address, uint16_t value, Arduino_10BASE_T1S_UDP * client, int functionCode)
+{
+  if(client == nullptr) {
+    client = _client;
   }
 
-  uint8_t tx_buf[8] = {(uint8_t)(_port & 0xFF00) >> 8, (uint8_t)(_port & 0x00FF),
-                              (uint8_t)((id & 0xFF00) >> 8), (uint8_t)id,
-                                (uint8_t)((address & 0xFF00) >> 8), (uint8_t)address,
-                                    (uint8_t)((value & 0xFF00) >> 8), (uint8_t)(value & 0x00FF)};
+  uint8_t tx_buf[8] = {(uint8_t)(functionCode & 0xFF00) >> 8, (uint8_t)(functionCode & 0x00FF), (uint8_t)((id & 0xFF00) >> 8), (uint8_t)id,
+  (uint8_t)((address & 0xFF00) >> 8), (uint8_t)address, (value & 0xFF00) >> 8, (uint8_t)(value & 0x00FF)};
 
   int tx_packet_size = sizeof(tx_buf);
-  write(tx_buf, tx_packet_size, _client);
+  write(tx_buf, tx_packet_size, client);
   return 1;
 }
 
 void ModbusT1SClientClass::write(uint8_t * buf, int len, Arduino_10BASE_T1S_UDP * client)
 {
-  _client->beginPacket(_server_ip, _server_port);
-  _client->write((const uint8_t *)buf, len);
-  _client->endPacket();
+  client->beginPacket(_server_ip, _server_port);
+  client->write((const uint8_t *)buf, len);
+  client->endPacket();
 }
 
 int ModbusT1SClientClass::read(Arduino_10BASE_T1S_UDP * client)
 {
-  int const rx_packet_size = _client->parsePacket();
-  if (rx_packet_size)
+  int const rx_packet_size = client->parsePacket();
+  if (rx_packet_size == 8)
   {
-    uint8_t rx_msg_buf[rx_packet_size] = {0};
-    int bytes_read = _client->read(rx_msg_buf, rx_packet_size - 1);
-    while (bytes_read != 0) {
-      std::copy(rx_msg_buf, rx_msg_buf + bytes_read, std::back_inserter(udp_rx_buf));
-      bytes_read = _client->read(rx_msg_buf, UDP_RX_MSG_BUF_SIZE - 1);
-    }
-    _client->flush();
-    return udp_rx_buf.size();
+    int bytes_read = client->read(udp_rx_buf, 8);
+    return rx_packet_size == bytes_read;
   }
   return 0;
 }
 
 bool ModbusT1SClientClass::checkPacket(int port, uint16_t id, uint16_t address)
 {
-  int port_rec = udp_rx_buf.at(0) << 8 | udp_rx_buf.at(1);
-  uint16_t id_rcv = udp_rx_buf.at(2) << 8 | udp_rx_buf.at(3);
-  uint16_t add_rcv = udp_rx_buf.at(4) << 8 | udp_rx_buf.at(5);
+  int port_rec = udp_rx_buf[0] << 8 | udp_rx_buf[1];
+  uint16_t id_rcv = udp_rx_buf[2] << 8 | udp_rx_buf[3];
+  uint16_t add_rcv = udp_rx_buf[4] << 8 | udp_rx_buf[5];
   if(port_rec == port && add_rcv == address && id_rcv == id) {
     return true;
   }
   return false;
 }
-void ModbusT1SClientClass::setT1SClient(Arduino_10BASE_T1S_UDP * client)
+
+void ModbusT1SClientClass::setT1SClient(Arduino_10BASE_T1S_UDP & client)
 {
-  _client = client;
+  _client = &client;
 }
 
 void ModbusT1SClientClass::setT1SPort(int port)
@@ -697,7 +457,7 @@ void ModbusT1SClientClass::setT1SPort(int port)
   udp_port = port;
 }
 
-void ModbusT1SClientClass::checkPLCAStatus()
+void ModbusT1SClientClass::update()
 {
   tc6_inst->service();
 
@@ -709,16 +469,7 @@ void ModbusT1SClientClass::checkPLCAStatus()
   if ((now - prev_beacon_check) > 1000)
   {
     prev_beacon_check = now;
-    if(callback == nullptr)
-    {
-      if (!tc6_inst->getPlcaStatus(OnPlcaStatus_client)) {
-        Serial.println("getPlcaStatus(...) failed");
-      }
-    } else {
-      if (!tc6_inst->getPlcaStatus(callback)) {
-        Serial.println("getPlcaStatus(...) failed");
-      }
-    }
+    //tc6_inst->getPlcaStatus(callback);
   }
 }
 
@@ -728,20 +479,27 @@ void ModbusT1SClientClass::setCallback(callback_f cb) {
   }
 }
 
-static void OnPlcaStatus_client(bool success, bool plcaStatus)
+static void default_OnPlcaStatus(bool success, bool plcaStatus)
 {
   if (!success)
   {
-    Serial.println("PLCA status register read failed");
     return;
   }
 
-  if (plcaStatus) {
-    Serial.println("PLCA Mode active");
-  } else {
-    Serial.println("CSMA/CD fallback");
+  if (!plcaStatus) {
     tc6_inst->enablePlca();
   }
 }
+
+void ModbusT1SClientClass::enablePOE() {
+  tc6_inst->digitalWrite(TC6::DIO::A0, true);
+  tc6_inst->digitalWrite(TC6::DIO::A1, true);
+}
+
+void ModbusT1SClientClass::disablePOE() {
+  tc6_inst->digitalWrite(TC6::DIO::A0, false);
+  tc6_inst->digitalWrite(TC6::DIO::A1, true);
+}
+
 ModbusT1SClientClass ModbusT1SClient;
 #endif

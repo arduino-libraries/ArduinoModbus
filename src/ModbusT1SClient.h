@@ -1,6 +1,6 @@
 /*
   This file is part of the ArduinoModbus library.
-  Copyright (c) 2018 Arduino SA. All rights reserved.
+  Copyright (c) 2024 Arduino SA. All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -28,10 +28,8 @@
 #include "ModbusT1SCommon.h"
 #include <SPI.h>
 
-
-
 #define RX_TIMEOUT 1000
-static void OnPlcaStatus_client(bool success, bool plcaStatus);
+
 using callback_f = void (*)(bool, bool);
 class ModbusT1SClientClass : public ModbusClient {
 public:
@@ -47,8 +45,6 @@ public:
    *
    * Return 1 on success, 0 on failure
    */
-  int begin(unsigned long baudrate, uint16_t config = SERIAL_8N1);
-  int begin(RS485Class& rs485, unsigned long baudrate, uint16_t config = SERIAL_8N1);
   int begin(int node_id);
 /**
  * Sets the IP address of the Modbus server.
@@ -88,7 +84,7 @@ void setModbusId(uint16_t id);
  * @param port The port number of the Modbus server. Default is 0.
  * @return int The status of the coil (1 for ON, 0 for OFF) or -1 if an error occurs.
  */
-int coilRead(int address, Arduino_10BASE_T1S_UDP * client = nullptr, int port = -1);
+int coilRead(int address, Arduino_10BASE_T1S_UDP * client = nullptr);
 
 /**
  * Reads the status of a coil from the Modbus server with a specified ID.
@@ -102,7 +98,7 @@ int coilRead(int address, Arduino_10BASE_T1S_UDP * client = nullptr, int port = 
  * @param port The port number of the Modbus server. Default is 0.
  * @return int The status of the coil (1 for ON, 0 for OFF) or -1 if an error occurs.
  */
-int coilRead(int id, int address, Arduino_10BASE_T1S_UDP * client = nullptr, int port = -1);
+int coilRead(int id, int address, Arduino_10BASE_T1S_UDP * client = nullptr);
 
 /**
  * Writes a value to a coil on the Modbus server.
@@ -116,7 +112,7 @@ int coilRead(int id, int address, Arduino_10BASE_T1S_UDP * client = nullptr, int
  * @param port The port number of the Modbus server. Default is 0.
  * @return int Returns 1 if the write operation is successful, 0 otherwise.
  */
-int coilWrite(int address, uint8_t value, Arduino_10BASE_T1S_UDP * client = nullptr, int port = -1);
+int coilWrite(int address, uint16_t value, Arduino_10BASE_T1S_UDP * client = nullptr);
 
 /**
  * Writes a value to a coil on the Modbus server with a specified ID.
@@ -131,7 +127,7 @@ int coilWrite(int address, uint8_t value, Arduino_10BASE_T1S_UDP * client = null
  * @param port The port number of the Modbus server. Default is 0.
  * @return int Returns 1 if the write operation is successful, 0 otherwise.
  */
-int coilWrite(int id, int address, uint8_t value, Arduino_10BASE_T1S_UDP * client = nullptr, int port = -1);
+int coilWrite(int id, int address, uint16_t value, Arduino_10BASE_T1S_UDP * client = nullptr);
 
 /**
  * Reads the status of a discrete input from the Modbus server.
@@ -144,7 +140,7 @@ int coilWrite(int id, int address, uint8_t value, Arduino_10BASE_T1S_UDP * clien
  * @param port The port number of the Modbus server. Default is 0.
  * @return int The status of the discrete input (1 for ON, 0 for OFF) or -1 if an error occurs.
  */
-int discreteInputRead(int address, Arduino_10BASE_T1S_UDP * client = nullptr, int port = -1);
+int discreteInputRead(int address, Arduino_10BASE_T1S_UDP * client = nullptr);
 
 /**
  * Reads the status of a discrete input from the Modbus server with a specified ID.
@@ -158,7 +154,7 @@ int discreteInputRead(int address, Arduino_10BASE_T1S_UDP * client = nullptr, in
  * @param port The port number of the Modbus server. Default is 0.
  * @return int The status of the discrete input (1 for ON, 0 for OFF) or -1 if an error occurs.
  */
-int discreteInputRead(int id, int address, Arduino_10BASE_T1S_UDP * client = nullptr, int port = -1);
+int discreteInputRead(int id, int address, Arduino_10BASE_T1S_UDP * client = nullptr);
 
 /**
  * Reads the value of an input register from the Modbus server.
@@ -171,7 +167,7 @@ int discreteInputRead(int id, int address, Arduino_10BASE_T1S_UDP * client = nul
  * @param port The port number of the Modbus server. Default is 0.
  * @return long The value of the input register or -1 if an error occurs.
  */
-long inputRegisterRead(int address, Arduino_10BASE_T1S_UDP * client = nullptr, int port = -1);
+long inputRegisterRead(int address, Arduino_10BASE_T1S_UDP * client = nullptr);
 
 /**
  * Reads the value of an input register from the Modbus server with a specified ID.
@@ -185,7 +181,7 @@ long inputRegisterRead(int address, Arduino_10BASE_T1S_UDP * client = nullptr, i
  * @param port The port number of the Modbus server. Default is 0.
  * @return long The value of the input register or -1 if an error occurs.
  */
-long inputRegisterRead(int id, int address, Arduino_10BASE_T1S_UDP * client = nullptr, int port = -1);
+long inputRegisterRead(int id, int address, Arduino_10BASE_T1S_UDP * client = nullptr);
 
 /**
  * Writes a value to a holding register on the Modbus server.
@@ -199,7 +195,7 @@ long inputRegisterRead(int id, int address, Arduino_10BASE_T1S_UDP * client = nu
  * @param port The port number of the Modbus server. Default is 0.
  * @return int Returns 1 if the write operation is successful, 0 otherwise.
  */
-int holdingRegisterWrite(int address, uint16_t value, Arduino_10BASE_T1S_UDP * client = nullptr, int port = -1);
+int holdingRegisterWrite(int address, uint16_t value, Arduino_10BASE_T1S_UDP * client = nullptr);
 
 /**
  * Writes a value to a holding register on the Modbus server with a specified ID.
@@ -214,7 +210,7 @@ int holdingRegisterWrite(int address, uint16_t value, Arduino_10BASE_T1S_UDP * c
  * @param port The port number of the Modbus server. Default is 0.
  * @return int Returns 1 if the write operation is successful, 0 otherwise.
  */
-int holdingRegisterWrite(int id, int address, uint16_t value, Arduino_10BASE_T1S_UDP * client = nullptr, int port = -1);
+int holdingRegisterWrite(int id, int address, uint16_t value, Arduino_10BASE_T1S_UDP * client = nullptr);
 
 /**
  * Reads the value of a holding register from the Modbus server.
@@ -227,7 +223,7 @@ int holdingRegisterWrite(int id, int address, uint16_t value, Arduino_10BASE_T1S
  * @param port The port number of the Modbus server. Default is 0.
  * @return long The value of the holding register or -1 if an error occurs.
  */
-long holdingRegisterRead(int address, Arduino_10BASE_T1S_UDP * client = nullptr, int port = -1);
+long holdingRegisterRead(int address, Arduino_10BASE_T1S_UDP * client = nullptr);
 
 /**
  * Reads the value of a holding register from the Modbus server with a specified ID.
@@ -241,27 +237,32 @@ long holdingRegisterRead(int address, Arduino_10BASE_T1S_UDP * client = nullptr,
  * @param port The port number of the Modbus server. Default is 0.
  * @return long The value of the holding register or -1 if an error occurs.
  */
-long holdingRegisterRead(int id, int address, Arduino_10BASE_T1S_UDP * client = nullptr, int port = -1);
-void setT1SClient(Arduino_10BASE_T1S_UDP * client = nullptr);
+long holdingRegisterRead(int id, int address, Arduino_10BASE_T1S_UDP * client = nullptr);
+void setT1SClient(Arduino_10BASE_T1S_UDP & client);
 void setRxTimeout(unsigned long timeout = RX_TIMEOUT);
 void setT1SPort(int port = 8889);
-void checkPLCAStatus();
+void update();
 void setCallback(callback_f cb = nullptr);
+void enablePOE();
+void disablePOE();
 
 
 private:
-  callback_f callback = nullptr;
+  long receive(int id, int address, Arduino_10BASE_T1S_UDP * client, int functionCode);
+  int  send(int id, int address, uint16_t value, Arduino_10BASE_T1S_UDP * client, int functionCode);
   void write(uint8_t * buf, int len, Arduino_10BASE_T1S_UDP * client);
   int read(Arduino_10BASE_T1S_UDP * client);
   bool checkPacket(int port, uint16_t id, uint16_t address);
 
 private:
-
+  IPAddress _gateway = IPAddress(0, 0, 0, 0);
   unsigned long _rx_timeout = RX_TIMEOUT;
+  callback_f callback = nullptr;
   IPAddress _server_ip = IPAddress(0, 0, 0, 0);
-  std::vector<uint8_t> udp_rx_buf;
   uint16_t _server_port = 8889;
   uint16_t _modbus_id = 0;
+  uint8_t udp_rx_buf[8] = {0};
+
   RS485Class* _rs485 = &RS485;
   Arduino_10BASE_T1S_UDP * _client = nullptr;
   int _node_id = 1;

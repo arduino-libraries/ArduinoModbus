@@ -21,7 +21,7 @@ Arduino_10BASE_T1S_UDP udp_client;
 void setup() {
   Serial.begin(115200);
 
-  ModbusT1SClient.setT1SClient(&udp_client);
+  ModbusT1SClient.setT1SClient(udp_client);
   ModbusT1SClient.setT1SPort(UDP_CLIENT_PORT);
   ModbusT1SClient.setServerPort(UDP_SERVER_PORT);
   ModbusT1SClient.setCallback(OnPlcaStatus);
@@ -30,11 +30,12 @@ void setup() {
     Serial.println("Failed to start Modbus T1S Client!");
     while (1);
   }
+  ModbusT1SClient.disablePOE();
 }
 
 unsigned long start = 0;
 void loop() {
-  ModbusT1SClient.checkPLCAStatus();
+  ModbusT1SClient.update();
 
   if ((millis() - start) > 1000)
   {

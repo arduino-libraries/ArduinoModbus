@@ -21,7 +21,7 @@ static uint16_t const UDP_CLIENT_PORT = 8888;
 void setup() {
  Serial.begin(115200);
 
-  ModbusT1SClient.setT1SClient(&udp_client);
+  ModbusT1SClient.setT1SClient(udp_client);
   ModbusT1SClient.setT1SPort(UDP_CLIENT_PORT);
   ModbusT1SClient.setServerPort(UDP_SERVER_PORT);
   ModbusT1SClient.setModbusId(MODBUS_ID);
@@ -34,7 +34,7 @@ void setup() {
 }
 
 void loop() {
-  ModbusT1SClient.checkPLCAStatus();
+  ModbusT1SClient.update();
 
   int res = ModbusT1SClient.coilRead(0x00);
   if (res == -1) {

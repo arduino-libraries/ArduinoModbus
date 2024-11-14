@@ -13,6 +13,8 @@
 #include <ArduinoRS485.h>
 #include <ArduinoModbus.h>
 
+RS485Class serial485(RS485_SERIAL, RS485_TX_PIN, RS485_DE_PIN, RS485_RE_PIN);
+
 static uint8_t const T1S_PLCA_NODE_ID = 0;
 static uint16_t const UDP_SERVER_PORT = 8889;
 
@@ -21,15 +23,15 @@ Arduino_10BASE_T1S_UDP udp_server;
 void setup() {
   Serial.begin(115200);
 
-  ModbusT1SServer.setT1SServer(&udp_server);
+  ModbusT1SServer.setT1SServer(udp_server);
   ModbusT1SServer.setT1SPort(UDP_SERVER_PORT);
-  ModbusT1SServer.setBadrate(9600);
   ModbusT1SServer.setCallback(OnPlcaStatus);
 
-  if (!ModbusT1SServer.begin(T1S_PLCA_NODE_ID)) {
+  if (!ModbusT1SServer.begin(T1S_PLCA_NODE_ID, 9600, SERIAL_8N1, serial485)) {
     Serial.println("Failed to start Modbus T1S Server!");
     while (1);
   }
+  ModbusT1SServer.disablePOE();
 }
 
 void loop() {

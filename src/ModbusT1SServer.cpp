@@ -26,17 +26,16 @@ extern "C" {
 
 #include "ModbusT1SServer.h"
 
-size_t const UDP_RX_MSG_BUF_SIZE = 16 + 1;
-RS485Class serial485(RS485_SERIAL, RS485_TX_PIN, RS485_DE_PIN, RS485_RE_PIN);
-
 /**
  * @class ModbusT1SServerClass
  * Class for Modbus T1S Server communication.
  *
  * This class provides functionalities to communicate with a Modbus T1S server.
  */
-ModbusT1SServerClass::ModbusT1SServerClass()
+ModbusT1SServerClass::ModbusT1SServerClass():
+  callback(default_OnPlcaStatus)
 {
+
 }
 
 /**
@@ -58,66 +57,14 @@ ModbusT1SServerClass::~ModbusT1SServerClass()
 {
 }
 
-/**
- * Initializes the Modbus server with the specified RS485 instance, baud rate, and configuration.
- *
- * This function sets up the Modbus server for communication using the specified RS485 instance, baud rate, and configuration.
- *
- * @param id (slave) id of the server
- * @param baudrate The baud rate for the Modbus communication.
- * @param config The configuration for the Modbus communication (e.g., parity, stop bits).
- * @return int Returns 1 if initialization is successful, 0 otherwise.
- */
-int ModbusT1SServerClass::begin(int id, unsigned long baudrate, uint16_t config)
-{
-  if(!ModbusRTUClient.begin(*_rs485, baudrate, config)) {
-    return -1;
-  }
-
-  ModbusRTUClient.setTimeout(2*1000UL);
-  return 1;
-}
-
-/**
- * Initializes the Modbus server with the specified RS485 instance, baud rate, and configuration.
- *
- * This function sets up the Modbus server for communication using the specified RS485 instance, baud rate, and configuration.
- *
- * @param rs485 Reference to an RS485Class object for RS485 communication.
- * @param id (slave) id of the server
- * @param baudrate The baud rate for the Modbus communication.
- * @param config The configuration for the Modbus communication (e.g., parity, stop bits).
- * @return int Returns 1 if initialization is successful, 0 otherwise.
- */
-int ModbusT1SServerClass::begin(RS485Class& rs485, int id, unsigned long baudrate, uint16_t config)
-{
-  _rs485 = &rs485;
-  return begin(id, baudrate, config);
-}
-
-/**
- * Initializes the Modbus server with the specified RS485 instance, baud rate, and configuration.
- *
- * This function sets up the Modbus server for communication using the specified RS485 instance, baud rate, and configuration.
- *
- * @param rs485 Reference to an RS485Class object for RS485 communication.
- * @param baudrate The baud rate for the Modbus communication.
- * @param config The configuration for the Modbus communication (e.g., parity, stop bits).
- * @return int Returns 1 if initialization is successful, 0 otherwise.
- */
-int ModbusT1SServerClass::begin(RS485Class& rs485, unsigned long baudrate, uint16_t config)
-{
-  _rs485 = &rs485;
-  if(!ModbusRTUClient.begin(rs485, baudrate, config)) {
-    return 0;
-  }
-  return 1;
-}
-
-
-int ModbusT1SServerClass::begin(int node_id)
+int ModbusT1SServerClass::begin(int node_id, unsigned long baudrate, uint16_t config, RS485Class& rs485)
 {
   _node_id = node_id;
+  if (&rs485 != nullptr)
+  {
+    _rs485 = &rs485;
+  }
+
   pinMode(IRQ_PIN, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(IRQ_PIN),
 
@@ -132,13 +79,15 @@ int ModbusT1SServerClass::begin(int node_id)
     return 0;
   }
 
-  IPAddress ip_addr = IPAddress(192, 168,  42, 100 + _node_id);
-  IPAddress network_mask = IPAddress(255, 255, 255, 0);
-  IPAddress gateway = IPAddress(192, 168,  42, 100);
+  if(_gateway == IPAddress(0, 0, 0, 0)) {
+    _gateway = IPAddress(192, 168, 42, 100);
+  }
 
-  T1SPlcaSettings t1s_plca_settings {
-    _node_id
-  };
+  IPAddress ip_addr = IPAddress(_gateway[0], _gateway[1], _gateway[2], _gateway[3] + _node_id);
+  IPAddress network_mask = IPAddress(255, 255, 255, 0);
+  IPAddress gateway = IPAddress(_gateway[0], _gateway[1], _gateway[2], _gateway[3]);
+
+  T1SPlcaSettings t1s_plca_settings(_node_id);
   T1SMacSettings const t1s_default_mac_settings;
   MacAddress const mac_addr = MacAddress::create_from_uid();
 
@@ -151,14 +100,7 @@ int ModbusT1SServerClass::begin(int node_id)
   {
     return 0;
   }
-
-  Serial.print("IP\t");
-  Serial.println(ip_addr);
-  Serial.println(mac_addr);
-  Serial.println(t1s_plca_settings);
-  Serial.println(t1s_default_mac_settings);
-
-  if (!_server->begin(udp_port))
+    if (!_server->begin(udp_port))
   {
     return 0;
   }
@@ -167,15 +109,19 @@ int ModbusT1SServerClass::begin(int node_id)
   float MODBUS_PRE_DELAY_BR  = MODBUS_BIT_DURATION * 9.6f * 3.5f * 1e6;
   float MODBUS_POST_DELAY_BR = MODBUS_BIT_DURATION * 9.6f * 3.5f * 1e6;
 
-  serial485.setDelays(MODBUS_PRE_DELAY_BR, MODBUS_POST_DELAY_BR);
+  _rs485->setDelays(MODBUS_PRE_DELAY_BR, MODBUS_POST_DELAY_BR);
 
-  if(!ModbusRTUClient.begin(serial485, (unsigned long) _baudrate, (uint16_t) SERIAL_8N1)) {
+  if(!ModbusRTUClient.begin(*_rs485, (unsigned long) _baudrate, (uint16_t) SERIAL_8N1)) {
     return 0;
   }
 
-  ModbusRTUClient.setTimeout(2*1000UL);
+  ModbusRTUClient.setTimeout(2*1000); //RRR set timeout
 
   return 1;
+}
+
+void ModbusT1SServerClass::setTimeout(unsigned long timeout) {
+  ModbusRTUClient.setTimeout(timeout);
 }
 
 /**
@@ -187,14 +133,6 @@ int ModbusT1SServerClass::begin(int node_id)
  */
 int ModbusT1SServerClass::poll()
 {
-  uint8_t request[MODBUS_RTU_MAX_ADU_LENGTH];
-
-  int requestLength = modbus_receive(_mb, request);
-
-  if (requestLength > 0) {
-    modbus_reply(_mb, request, requestLength, &_mbMapping);
-    return 1;
-  }
   return 0;
 }
 
@@ -207,28 +145,7 @@ int ModbusT1SServerClass::poll()
  */
 int ModbusT1SServerClass::coilRead(int address)
 {
-  int res = -1;
-  if(_server == nullptr) {
-    return res;
-  }
-
-  int modbus_id =  udp_rx_buf.at(2) << 8 |  udp_rx_buf.at(3);
-  int address_mod =  udp_rx_buf.at(4) << 8 |  udp_rx_buf.at(5);
-  if(address != -1) {
-    address_mod = address;
-  }
-
-  if (ModbusRTUClient.requestFrom(modbus_id, COILS, address_mod, 1)) {
-      if (ModbusRTUClient.available()) {
-      res = ModbusRTUClient.read();
-      udp_rx_buf.push_back((uint8_t)res);
-      _server->beginPacket(_last_ip, _last_port);
-      _server->write((uint8_t *)udp_rx_buf.data(), udp_rx_buf.size());
-      _server->endPacket();
-    }
-  }
-  udp_rx_buf.erase(udp_rx_buf.begin(), udp_rx_buf.end());
-  return res;
+  return read(address, COILS);
 }
 
 /**
@@ -243,27 +160,8 @@ int ModbusT1SServerClass::coilRead(int address)
  */
 int ModbusT1SServerClass::coilWrite(int address, uint8_t value)
 {
-  int res = -1;
-  if(_server == nullptr) {
-    return res;
-  }
-
-  int modbus_id =  udp_rx_buf.at(2) << 8 |  udp_rx_buf.at(3);
-  int address_mod =  udp_rx_buf.at(4) << 8 |  udp_rx_buf.at(5);
-  if(address != -1) {
-    address_mod = address;
-  }
-  uint8_t coilValue = int( udp_rx_buf.at(6));
-
-  ModbusRTUClient.beginTransmission(modbus_id, COILS, address_mod, 1);
-  res = ModbusRTUClient.write(coilValue);
-  if (!ModbusRTUClient.endTransmission()) {
-    res = -1;
-  }
-  udp_rx_buf.erase(udp_rx_buf.begin(), udp_rx_buf.end());
-  return res;
+  return write(address, COILS);
 }
-
 /**
  * Reads the status of a discrete input from the Modbus server.
  *
@@ -274,28 +172,7 @@ int ModbusT1SServerClass::coilWrite(int address, uint8_t value)
  * @return int The status of the discrete input (1 for ON, 0 for OFF) or -1 if an error occurs.
  */
 int ModbusT1SServerClass::discreteInputRead(int address) {
-  int res = -1;
-  if(_server == nullptr) {
-    return res;
-  }
-
-  int modbus_id =  udp_rx_buf.at(2) << 8 |  udp_rx_buf.at(3);
-  int address_mod =  udp_rx_buf.at(4) << 8 |  udp_rx_buf.at(5);
-  if(address != -1) {
-       address_mod = address;
-  }
-
-  if (ModbusRTUClient.requestFrom(modbus_id, DISCRETE_INPUTS, address_mod, 1)) {
-    if (ModbusRTUClient.available()) {
-      res = ModbusRTUClient.read();
-      udp_rx_buf.push_back((uint8_t)res);
-      _server->beginPacket(_last_ip, _last_port);
-      _server->write((uint8_t *)udp_rx_buf.data(), udp_rx_buf.size());
-      _server->endPacket();
-    }
-  }
-  udp_rx_buf.erase(udp_rx_buf.begin(), udp_rx_buf.end());
-  return res;
+  return read(address, DISCRETE_INPUTS);
 }
 
 /**
@@ -309,28 +186,7 @@ int ModbusT1SServerClass::discreteInputRead(int address) {
  */
 long ModbusT1SServerClass::inputRegisterRead(int address)
 {
-  long res = -1;
-  if(_server == nullptr) {
-    return res;
-  }
-  int modbus_id =  udp_rx_buf.at(2) << 8 |  udp_rx_buf.at(3);
-  int address_mod =  udp_rx_buf.at(4) << 8 |  udp_rx_buf.at(5);
-  if(address != -1) {
-    address_mod = address;
-  }
-
-  if (ModbusRTUClient.requestFrom(modbus_id, INPUT_REGISTERS, address_mod, 1)) {
-    if (ModbusRTUClient.available()) {
-      int16_t data = ModbusRTUClient.read();
-      uint8_t tx_buf[2] = {(uint8_t)((data & 0xFF00) >> 8), (uint8_t)(data & 0x00FF)};
-      std::copy(tx_buf, tx_buf + 2, std::back_inserter(udp_rx_buf));
-      _server->beginPacket(_last_ip, _last_port);
-      _server->write((uint8_t *)udp_rx_buf.data(), udp_rx_buf.size());
-      _server->endPacket();
-    }
-  }
-  udp_rx_buf.erase(udp_rx_buf.begin(), udp_rx_buf.end());
-  return res;
+  return read(address, INPUT_REGISTERS);
 }
 
 /**
@@ -344,29 +200,7 @@ long ModbusT1SServerClass::inputRegisterRead(int address)
  * @return int 1 if the write operation is successful, -1 if an error occurs.
  */
 long ModbusT1SServerClass::holdingRegisterRead(int address) {
-  long res = -1;
-  if(_server == nullptr) {
-    return res;
-  }
-
-  int modbus_id =  udp_rx_buf.at(2) << 8 |  udp_rx_buf.at(3);
-  int address_mod =  udp_rx_buf.at(4) << 8 |  udp_rx_buf.at(5);
-  if(address != -1) {
-    address_mod = address;
-  }
-
-  if (ModbusRTUClient.requestFrom(modbus_id, HOLDING_REGISTERS, address_mod, 1)) {
-    if (ModbusRTUClient.available()) {
-      int16_t data = ModbusRTUClient.read();
-      uint8_t tx_buf[2] = {(uint8_t)((data & 0xFF00) >> 8), (uint8_t)(data & 0x00FF)};
-      std::copy(tx_buf, tx_buf + 2, std::back_inserter(udp_rx_buf));
-      _server->beginPacket(_last_ip, _last_port);
-      _server->write((uint8_t *)udp_rx_buf.data(), udp_rx_buf.size());
-      _server->endPacket();
-    }
-  }
-  udp_rx_buf.erase(udp_rx_buf.begin(), udp_rx_buf.end());
-  return res;
+  return read(address, HOLDING_REGISTERS);
 }
 
 /**
@@ -380,25 +214,7 @@ long ModbusT1SServerClass::holdingRegisterRead(int address) {
  * @return int 1 if the write operation is successful, -1 if an error occurs.
  */
 int ModbusT1SServerClass::holdingRegisterWrite(int address) {
-  int res = -1;
-  if(_server == nullptr) {
-    return res;
-  }
-
-  int modbus_id =  udp_rx_buf.at(2) << 8 |  udp_rx_buf.at(3);
-  int address_mod =  udp_rx_buf.at(4) << 8 |  udp_rx_buf.at(5);
-  if(address != -1) {
-    address_mod = address;
-  }
-  uint16_t value =  udp_rx_buf.at(6) << 8 |  udp_rx_buf.at(7);
-
-  ModbusRTUClient.beginTransmission(modbus_id, HOLDING_REGISTERS, address_mod, 1);
-  res = ModbusRTUClient.write(value);
-  if (!ModbusRTUClient.endTransmission()) {
-    res = -1;
-  }
-  udp_rx_buf.erase(udp_rx_buf.begin(), udp_rx_buf.end());
-  return res;
+  return write(address, HOLDING_REGISTERS);
 }
 
 /**
@@ -414,26 +230,19 @@ int ModbusT1SServerClass::parsePacket() {
     return res;
   }
 
-  int const rx_packet_size = _server->parsePacket();
-  if (rx_packet_size)
+  int rx_packet_size = _server->parsePacket();
+  if (rx_packet_size == 8)
   {
-    uint8_t rx_msg_buf[UDP_RX_MSG_BUF_SIZE] = {0};
-    int bytes_read = _server->read(rx_msg_buf, UDP_RX_MSG_BUF_SIZE - 1);
-    while (bytes_read != 0) {
-      std::copy(rx_msg_buf, rx_msg_buf + bytes_read, std::back_inserter(udp_rx_buf));
-      bytes_read = _server->read(rx_msg_buf, UDP_RX_MSG_BUF_SIZE - 1);
-    }
-    res = udp_rx_buf.at(0) << 8 | udp_rx_buf.at(1);
+    int bytes_read = _server->read(udp_rx_buf, 8);
+    res = udp_rx_buf[0] << 8 | udp_rx_buf[1];
+    _last_ip = _server->remoteIP();
+    _last_port = _server->remotePort();
+     return rx_packet_size == bytes_read ? res : -1;
   }
-
-  _last_ip = _server->remoteIP();
-  _last_port = _server->remotePort();
-  _server->flush();
-
   return res;
 }
 
-void ModbusT1SServerClass::checkPLCAStatus()
+void ModbusT1SServerClass::checkStatus()
 {
   tc6_inst->service();
 
@@ -445,16 +254,7 @@ void ModbusT1SServerClass::checkPLCAStatus()
   if ((now - prev_beacon_check) > 1000)
   {
     prev_beacon_check = now;
-    if(callback == nullptr)
-    {
-      if (!tc6_inst->getPlcaStatus(OnPlcaStatus_server)) {
-        Serial.println("getPlcaStatus(...) failed");
-      }
-    } else {
-      if (!tc6_inst->getPlcaStatus(callback)) {
-        Serial.println("getPlcaStatus(...) failed");
-      }
-    }
+    tc6_inst->getPlcaStatus(callback);
   }
 }
 
@@ -462,15 +262,15 @@ void ModbusT1SServerClass::update() {
   /* Services the hardware and the protocol stack.
      Must be called cyclic. The faster the better.
   */
-  checkPLCAStatus();
-  switch (ModbusT1SServer.parsePacket())
-  {
+   checkStatus();
+    switch (parsePacket())
+    {
     case UDP_READ_COIL_PORT:
-      ModbusT1SServer.coilRead();
+      coilRead();
       break;
 
     case UDP_WRITE_COIL_PORT:
-      ModbusT1SServer.coilWrite();
+      coilWrite();
       break;
 
     case UDP_READ_DI_PORT:
@@ -491,8 +291,73 @@ void ModbusT1SServerClass::update() {
 
     default:
       break;
-  }
+   }
 }
+
+long ModbusT1SServerClass::read(int address, int functionCode) {
+  long res = -1;
+  if(_server == nullptr) {
+    return res;
+  }
+
+  int modbus_id =  udp_rx_buf[2] << 8 |  udp_rx_buf[3];
+  int address_mod =  udp_rx_buf[4] << 8 |  udp_rx_buf[5];
+  if (ModbusRTUClient.requestFrom(modbus_id, functionCode, address_mod, 1)) {
+     if (ModbusRTUClient.available()) {
+       switch (functionCode) {
+         case INPUT_REGISTERS:
+         case HOLDING_REGISTERS:
+           res = ModbusRTUClient.read();
+           break;
+        case COILS:
+        case DISCRETE_INPUTS:
+          res = (uint8_t) ModbusRTUClient.read();
+          break;
+        default:
+          return res;
+      }
+
+      if(res != -1) {
+        udp_rx_buf[6] = (uint8_t)((res & 0xFF00) >> 8);
+        udp_rx_buf[7] = (uint8_t)(res & 0x00FF);
+        _server->beginPacket(_last_ip, _last_port);
+        _server->write((uint8_t *)udp_rx_buf, sizeof(udp_rx_buf));
+        _server->endPacket();
+      }
+    }
+  }
+  return res;
+}
+
+long ModbusT1SServerClass::write(int address,  int functionCode) {
+  long res = -1;
+  if(_server == nullptr) {
+    return res;
+  }
+
+  int modbus_id =  udp_rx_buf[2] << 8 |  udp_rx_buf[3];
+  int address_mod =  udp_rx_buf[4] << 8 |  udp_rx_buf[5];
+  int value = -1;
+  switch (functionCode) {
+    case HOLDING_REGISTERS:
+      value =  udp_rx_buf[6] << 8 |  udp_rx_buf[7];
+      break;
+    case COILS:
+      value = udp_rx_buf[7];
+      break;
+    default:
+      return res;
+      break;
+  }
+
+  ModbusRTUClient.beginTransmission(modbus_id, functionCode, address_mod, 1);
+  res = ModbusRTUClient.write(value);
+  if (!ModbusRTUClient.endTransmission()) {
+    res = -1;
+  }
+  return res;
+}
+
 
 /**
  * Sets the Arduino_10BASE_T1S_UDP server for communication.
@@ -501,15 +366,15 @@ void ModbusT1SServerClass::update() {
  *
  * @param server A pointer to the Arduino_10BASE_T1S_UDP server.
  */
-void ModbusT1SServerClass::setT1SServer(Arduino_10BASE_T1S_UDP * server) {
-  _server = server;
+void ModbusT1SServerClass::setT1SServer(Arduino_10BASE_T1S_UDP & server) {
+  _server = &server;
 }
 
 
 void ModbusT1SServerClass::setT1SPort(int port) {
   udp_port = port;
 }
-void ModbusT1SServerClass::setBadrate(int baudrate) {
+void ModbusT1SServerClass::setBaudrate(int baudrate) {
   _baudrate = baudrate;
 }
 
@@ -519,7 +384,7 @@ void ModbusT1SServerClass::setCallback(callback_f cb) {
   }
 }
 
-static void OnPlcaStatus_server(bool success, bool plcaStatus)
+static void default_OnPlcaStatus(bool success, bool plcaStatus)
 {
   if (!success)
   {
@@ -533,6 +398,20 @@ static void OnPlcaStatus_server(bool success, bool plcaStatus)
     Serial.println("CSMA/CD fallback");
     tc6_inst->enablePlca();
   }
+}
+
+void ModbusT1SServerClass::enablePOE() {
+  tc6_inst->digitalWrite(TC6::DIO::A0, true);
+  tc6_inst->digitalWrite(TC6::DIO::A1, true);
+}
+
+void ModbusT1SServerClass::disablePOE() {
+  tc6_inst->digitalWrite(TC6::DIO::A0, false);
+  tc6_inst->digitalWrite(TC6::DIO::A1, true);
+}
+
+void ModbusT1SServerClass::setGatwayIP(IPAddress ip) {
+  _gateway = ip;
 }
 
 ModbusT1SServerClass ModbusT1SServer;

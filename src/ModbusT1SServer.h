@@ -28,15 +28,6 @@
 #include "ModbusT1SCommon.h"
 #include <SPI.h>
 
-// valutare meglio dove metterla
-#define RS485_SERIAL Serial1
-#define RS485_TX_PIN 1
-#define RS485_RX_PIN 0
-#define RS485_DE_PIN 8
-#define RS485_RE_PIN 7
-#define PRE_DELAY    100
-#define POST_DELAY   100
-#define PWR_CARRIER_RATIO  0.18f
   
 static void OnPlcaStatus_server(bool success, bool plcaStatus);
 using callback_f = void (*)(bool, bool);
@@ -64,10 +55,8 @@ public:
    *
    * Return 1 on success, 0 on failure
    */
-  int begin(int id, unsigned long baudrate, uint16_t config = SERIAL_8N1);
-  int begin(RS485Class& rs485, int id, unsigned long baudrate, uint16_t config = SERIAL_8N1);
-  int begin(RS485Class& rs485, unsigned long baudrate, uint16_t config = SERIAL_8N1);
-  int begin(int node_id);
+
+  int begin(int node_id, unsigned long baudrate, uint16_t config = SERIAL_8N1, RS485Class& rs485 = RS485);
   /**
    * Reads a coil from the Modbus server.
    *
@@ -151,27 +140,33 @@ public:
    *
    * @param server The T1S server to use
    */
-  void setT1SServer(Arduino_10BASE_T1S_UDP * server);
+  void setT1SServer(Arduino_10BASE_T1S_UDP & server);
 
   void setT1SPort(int port = 8889);
 
   void update();
 
-  void setBadrate(int baudrate);
+  void setBaudrate(int baudrate);
 
 
   /**
    * Poll interface for requests
    */
+  void setGatwayIP(IPAddress ip);
   virtual int poll();
-  void checkPLCAStatus();
+  void checkStatus();
   void setCallback(callback_f cb = nullptr);
-
+  long read(int address, int functionCode);
+  long write(int address, int functionCode);
+  void enablePOE();
+  void disablePOE();
+  void setTimeout(unsigned long timeout);
 
 private:
+  IPAddress _gateway = IPAddress(0, 0, 0, 0);
+  uint8_t udp_rx_buf[8] = {0};
   callback_f callback = nullptr;
   RS485Class* _rs485 = &RS485;
-  std::vector<uint8_t> udp_rx_buf;
   Arduino_10BASE_T1S_UDP * _server = nullptr;
   IPAddress _last_ip;
   uint16_t _last_port;
@@ -179,7 +174,7 @@ private:
   int _node_id = 1;
   int udp_port = 0;
 };
-//Arduino_10BASE_T1S_UDP udp_server;
+
 extern ModbusT1SServerClass ModbusT1SServer;
 
 #endif

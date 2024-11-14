@@ -25,7 +25,7 @@ extern "C" {
 }
 
 #include "ModbusT1SClient.h"
-
+#ifndef __AVR__
 /**
  * @class ModbusT1SClientClass
  * Class for Modbus T1S Client communication.
@@ -501,3 +501,4 @@ void ModbusT1SClientClass::disablePOE() {
 }
 
 ModbusT1SClientClass ModbusT1SClient;
+#endif

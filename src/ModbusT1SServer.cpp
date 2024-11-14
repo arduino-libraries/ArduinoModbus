@@ -17,6 +17,7 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+
 #include <errno.h>
 
 extern "C" {
@@ -25,7 +26,7 @@ extern "C" {
 }
 
 #include "ModbusT1SServer.h"
-
+#ifndef __AVR__
 /**
  * @class ModbusT1SServerClass
  * Class for Modbus T1S Server communication.
@@ -411,3 +412,4 @@ void ModbusT1SServerClass::setGatwayIP(IPAddress ip) {
 }
 
 ModbusT1SServerClass ModbusT1SServer;
+#endif

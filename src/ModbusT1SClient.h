@@ -19,7 +19,7 @@
 
 #ifndef _MODBUS_T1S_CLIENT_H_INCLUDED
 #define _MODBUS_T1S_CLIENT_H_INCLUDED
-
+#ifndef __AVR__
 #include "ModbusClient.h"
 #include <ArduinoRS485.h>
 #include <Arduino_10BASE_T1S.h>
@@ -268,4 +268,5 @@ private:
 };
 
 extern ModbusT1SClientClass ModbusT1SClient;
+#endif
 #endif

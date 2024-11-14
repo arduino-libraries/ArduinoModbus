@@ -1,6 +1,7 @@
 #ifndef _MODBUS_T1S_COMMON_H_INCLUDED
 #define _MODBUS_T1S_COMMON_H_INCLUDED
 
+#ifndef __AVR__
 #include <Arduino_10BASE_T1S.h>
 
 #define INIT_TC6(_SPI, _CS_PIN, _RESET_PIN, _IRQ_PIN) \
@@ -32,4 +33,5 @@ enum ModbusT1SFunctionCode {
   UDP_WRITE_HR_PORT
 };
 
+#endif
 #endif

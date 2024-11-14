@@ -20,13 +20,13 @@
 #ifndef _MODBUS_T1S_SERVER_H_INCLUDED
 #define _MODBUS_T1S_SERVER_H_INCLUDED
 
+#ifndef __AVR__
 #include "ModbusServer.h"
 #include <ArduinoRS485.h>
 #include <Arduino_10BASE_T1S.h>
 #include "ModbusRTUClient.h"
 #include "ModbusT1SCommon.h"
 #include <SPI.h>
-
 
 using callback_f = void (*)(bool, bool);
 class ModbusT1SServerClass : public ModbusServer {
@@ -175,4 +175,5 @@ private:
 
 extern ModbusT1SServerClass ModbusT1SServer;
 
+#endif
 #endif

@@ -19,7 +19,6 @@
 
 #ifndef _MODBUS_T1S_SERVER_H_INCLUDED
 #define _MODBUS_T1S_SERVER_H_INCLUDED
-#if (defined(ARDUINO_UNOR4_WIFI) || defined(ARDUINO_UNOR4_MINIMA))
 
 #include "ModbusServer.h"
 #include <ArduinoRS485.h>
@@ -28,8 +27,7 @@
 #include "ModbusT1SCommon.h"
 #include <SPI.h>
 
-  
-static void OnPlcaStatus_server(bool success, bool plcaStatus);
+
 using callback_f = void (*)(bool, bool);
 class ModbusT1SServerClass : public ModbusServer {
 public:
@@ -177,5 +175,4 @@ private:
 
 extern ModbusT1SServerClass ModbusT1SServer;
 
-#endif
 #endif

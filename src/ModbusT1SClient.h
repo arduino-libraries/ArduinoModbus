@@ -19,8 +19,6 @@
 
 #ifndef _MODBUS_T1S_CLIENT_H_INCLUDED
 #define _MODBUS_T1S_CLIENT_H_INCLUDED
-#if (defined(ARDUINO_UNOR4_WIFI) || defined(ARDUINO_UNOR4_MINIMA))
-
 
 #include "ModbusClient.h"
 #include <ArduinoRS485.h>
@@ -270,5 +268,4 @@ private:
 };
 
 extern ModbusT1SClientClass ModbusT1SClient;
-#endif
 #endif

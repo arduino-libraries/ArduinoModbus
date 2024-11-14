@@ -16,8 +16,7 @@
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
- 
-#if (defined(ARDUINO_UNOR4_WIFI) || defined(ARDUINO_UNOR4_MINIMA))
+
 #include <errno.h>
 
 extern "C" {
@@ -502,4 +501,3 @@ void ModbusT1SClientClass::disablePOE() {
 }
 
 ModbusT1SClientClass ModbusT1SClient;
-#endif

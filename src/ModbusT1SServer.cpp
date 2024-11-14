@@ -16,7 +16,7 @@
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
-#if (defined(ARDUINO_UNOR4_WIFI) || defined(ARDUINO_UNOR4_MINIMA))
+
 #include <errno.h>
 
 extern "C" {
@@ -388,14 +388,10 @@ static void default_OnPlcaStatus(bool success, bool plcaStatus)
 {
   if (!success)
   {
-    Serial.println("PLCA status register read failed");
     return;
   }
 
-  if (plcaStatus) {
-    Serial.println("PLCA Mode active");
-  } else {
-    Serial.println("CSMA/CD fallback");
+  if (!plcaStatus) {
     tc6_inst->enablePlca();
   }
 }
@@ -415,4 +411,3 @@ void ModbusT1SServerClass::setGatwayIP(IPAddress ip) {
 }
 
 ModbusT1SServerClass ModbusT1SServer;
-#endif

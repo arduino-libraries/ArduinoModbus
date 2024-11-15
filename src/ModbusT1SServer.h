@@ -47,14 +47,16 @@ public:
   /**
    * Start the Modbus T1S server with the specified parameters
    *
-   * @param id (slave) id of the server
+   * @param node_id id of the server
    * @param baudrate Baud rate to use
    * @param config serial config. to use defaults to SERIAL_8N1
+   * @param rs485 RS485 object to use
    *
    * Return 1 on success, 0 on failure
    */
 
   int begin(int node_id, unsigned long baudrate, uint16_t config = SERIAL_8N1, RS485Class& rs485 = RS485);
+
   /**
    * Reads a coil from the Modbus server.
    *
@@ -73,10 +75,9 @@ public:
    * on the Modbus server using the provided UDP client.
    *
    * @param address The address of the coil to write to.
-   * @param value The value to write to the coil (1 for ON, 0 for OFF).
    * @return int Returns 1 if the write operation is successful, 0 otherwise.
    */
-  int coilWrite(int address = -1, uint8_t value = 255);
+  int coilWrite(int address = -1);
 
   /**
    * Reads the status of a discrete input from the Modbus server.
@@ -107,7 +108,6 @@ public:
    * on the Modbus server using the provided UDP client.
    *
    * @param address The address of the holding register to write to.
-   * @param value The value to write to the holding register.
    * @return int 1 if the write operation is successful, -1 if an error occurs.
    */
   long holdingRegisterRead(int address = -1);
@@ -119,7 +119,6 @@ public:
    * on the Modbus server using the provided UDP client.
    *
    * @param address The address of the holding register to write to.
-   * @param value The value to write to the holding register.
    * @return int 1 if the write operation is successful, -1 if an error occurs.
    */
   int holdingRegisterWrite(int address = -1);
@@ -140,25 +139,89 @@ public:
    */
   void setT1SServer(Arduino_10BASE_T1S_UDP & server);
 
+  /**
+   * Set the port to use for communication
+   *
+   * @param port The port to use
+   */
   void setT1SPort(int port = 8889);
 
+  /**
+   * Update the Modbus server.
+   *
+   * This function updates the Modbus server.
+   */
   void update();
 
+  /**
+   * Set the baudrate to use for communication
+   *
+   * @param baudrate The baudrate to use
+   */
   void setBaudrate(int baudrate);
 
+/**
+ * Sets the gateway IP address.
+ *
+ * This function sets the gateway IP address.
+ *
+ * @param ip The gateway IP address.
+ */
+  void setGatwayIP(IPAddress ip);
 
   /**
-   * Poll interface for requests
+   * Poll the Modbus server.
+   *
+   * This function polls the Modbus server.
+   *
+   * @return int The status of the poll.
    */
-  void setGatwayIP(IPAddress ip);
   virtual int poll();
+
+  /**
+   * Checks the PLCA status and Services the hardware and the protocol stack.
+   *
+   * This function checks the PLCA status and services the hardware and the
+   * protocol stack.
+   *
+   */
   void checkStatus();
+
+  /**
+   * Set the callback function to use for PLCA status check.
+   *
+   * This function sets the callback function to use for PLCA status check.
+   *
+   * @param cb The callback function to use.
+   */
   void setCallback(callback_f cb = nullptr);
+
+   /**
+   * Enables Power Over Ethernet (POE).
+   *
+   * This function enables Power Over Ethernet (POE) setting the device as power source.
+   */
+  void enablePOE();
+
+  /**
+   * Disables Power Over Ethernet (POE).
+   *
+   * This function disables Power Over Ethernet (POE) and set the USB as power source.
+   */
+  void disablePOE();
+
+  /**
+   * Set the Modbus RTU client timeout.
+   *
+   * This function sets the Modbus RTU client timeout.
+   *
+   *  @param timeout The timeout value in milliseconds.
+   */
+  void setTimeout(unsigned long timeout);
+
+private:
   long read(int address, int functionCode);
   long write(int address, int functionCode);
-  void enablePOE();
-  void disablePOE();
-  void setTimeout(unsigned long timeout);
 
 private:
   IPAddress _gateway = IPAddress(0, 0, 0, 0);

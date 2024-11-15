@@ -82,7 +82,7 @@ int ModbusT1SClientClass::begin(int node_id)
   {
     return 0;
   }
-  //RRR ADD set IPs
+
   if(_gateway == IPAddress(0, 0, 0, 0)) {
     _gateway = IPAddress(192, 168, 42, 100);
   }
@@ -174,7 +174,6 @@ void ModbusT1SClientClass::setRxTimeout(unsigned long timeout)
  *
  * @param address The address of the coil to read.
  * @param client A pointer to the Arduino_10BASE_T1S_UDP client used for communication.
- * @param port The port number to use for the communication.
  * @return int The status of the coil (1 for ON, 0 for OFF) or -1 if an error occurs.
  */
 int ModbusT1SClientClass::coilRead(int address, Arduino_10BASE_T1S_UDP * client)
@@ -191,7 +190,6 @@ int ModbusT1SClientClass::coilRead(int address, Arduino_10BASE_T1S_UDP * client)
  * @param id The ID of the Modbus server.
  * @param address The address of the coil to read.
  * @param client A pointer to the Arduino_10BASE_T1S_UDP client used for communication.
- * @param port The port number to use for the communication.
  * @return int The status of the coil (1 for ON, 0 for OFF) or -1 if an error occurs.
  */
 int ModbusT1SClientClass::coilRead(int id, int address, Arduino_10BASE_T1S_UDP * client)
@@ -208,7 +206,6 @@ int ModbusT1SClientClass::coilRead(int id, int address, Arduino_10BASE_T1S_UDP *
  * @param address The address of the coil to write to.
  * @param value The value to write to the coil (1 for ON, 0 for OFF).
  * @param client A pointer to the Arduino_10BASE_T1S_UDP client used for communication.
- * @param port The port number to use for the communication.
  * @return int 1 if the write operation is successful, -1 if an error occurs.
  */
 int ModbusT1SClientClass::coilWrite(int address, uint16_t value, Arduino_10BASE_T1S_UDP * client)
@@ -226,7 +223,6 @@ int ModbusT1SClientClass::coilWrite(int address, uint16_t value, Arduino_10BASE_
  * @param address The address of the coil to write to.
  * @param value The value to write to the coil (1 for ON, 0 for OFF).
  * @param client A pointer to the Arduino_10BASE_T1S_UDP client used for communication.
- * @param port The port number to use for the communication.
  * @return int 1 if the write operation is successful, -1 if an error occurs.
  */
 int ModbusT1SClientClass::coilWrite(int id, int address, uint16_t value, Arduino_10BASE_T1S_UDP * client)
@@ -242,7 +238,6 @@ int ModbusT1SClientClass::coilWrite(int id, int address, uint16_t value, Arduino
  *
  * @param address The address of the discrete input to read.
  * @param client A pointer to the Arduino_10BASE_T1S_UDP client used for communication.
- * @param port The port number to use for the communication.
  * @return int The status of the discrete input (1 for ON, 0 for OFF) or -1 if an error occurs.
  */
 int ModbusT1SClientClass::discreteInputRead(int address, Arduino_10BASE_T1S_UDP * client)
@@ -259,7 +254,6 @@ int ModbusT1SClientClass::discreteInputRead(int address, Arduino_10BASE_T1S_UDP 
  * @param id The ID of the Modbus server.
  * @param address The address of the discrete input to read.
  * @param client A pointer to the Arduino_10BASE_T1S_UDP client used for communication.
- * @param port The port number to use for the communication.
  * @return int The status of the discrete input (1 for ON, 0 for OFF) or -1 if an error occurs.
  */
 int ModbusT1SClientClass::discreteInputRead(int id, int address, Arduino_10BASE_T1S_UDP * client)
@@ -275,7 +269,6 @@ int ModbusT1SClientClass::discreteInputRead(int id, int address, Arduino_10BASE_
  *
  * @param address The address of the input register to read.
  * @param client A pointer to the Arduino_10BASE_T1S_UDP client used for communication.
- * @param port The port number to use for the communication.
  * @return long The value of the input register or -1 if an error occurs.
  */
 long ModbusT1SClientClass::inputRegisterRead(int address, Arduino_10BASE_T1S_UDP * client)
@@ -292,7 +285,6 @@ long ModbusT1SClientClass::inputRegisterRead(int address, Arduino_10BASE_T1S_UDP
  * @param id The ID of the Modbus server.
  * @param address The address of the input register to read.
  * @param client A pointer to the Arduino_10BASE_T1S_UDP client used for communication.
- * @param port The port number to use for the communication.
  * @return long The value of the input register or -1 if an error occurs.
  */
 long ModbusT1SClientClass::inputRegisterRead(int id, int address, Arduino_10BASE_T1S_UDP * client)
@@ -308,7 +300,6 @@ long ModbusT1SClientClass::inputRegisterRead(int id, int address, Arduino_10BASE
  *
  * @param address The address of the holding register to read from.
  * @param client A pointer to an Arduino_10BASE_T1S_UDP client used for communication.
- * @param port The port number to use for the communication.
  * @return Returns the value of the holding register on success, or -1 if the client is null.
  */
 long ModbusT1SClientClass::holdingRegisterRead(int address, Arduino_10BASE_T1S_UDP * client)
@@ -326,7 +317,6 @@ long ModbusT1SClientClass::holdingRegisterRead(int address, Arduino_10BASE_T1S_U
  * @param address The address of the holding register to write to.
  * @param value The value to write to the holding register.
  * @param client A pointer to an Arduino_10BASE_T1S_UDP client used for communication.
- * @param port The port number to use for the communication.
  * @return Returns 1 on success, or -1 if the client is null.
  */
 long ModbusT1SClientClass::holdingRegisterRead(int id, int address, Arduino_10BASE_T1S_UDP * client)
@@ -361,12 +351,142 @@ int ModbusT1SClientClass::holdingRegisterWrite(int address, uint16_t value, Ardu
  * @param address The address of the holding register to write to.
  * @param value The value to write to the holding register.
  * @param client A pointer to an Arduino_10BASE_T1S_UDP client used for communication.
- * @param port The port number to use for the communication.
  * @return Returns 1 on success, or -1 if the client is null.
  */
 int ModbusT1SClientClass::holdingRegisterWrite(int id, int address, uint16_t value, Arduino_10BASE_T1S_UDP * client)
 {
   return send(id, address, value, client, UDP_WRITE_HR_PORT);
+}
+
+/**
+ * Checks if the received packet matches the specified port, id, and address.
+ *
+ * This function compares the received packet's port, id, and address with the provided
+ * values to determine if they match.
+ *
+ * @param port The port number to check against the received packet.
+ * @param id The id to check against the received packet.
+ * @param address The address to check against the received packet.
+ * @return true if the received packet matches the specified port, id, and address; false otherwise.
+ */
+bool ModbusT1SClientClass::checkPacket(int port, uint16_t id, uint16_t address)
+{
+  int port_rec = udp_rx_buf[0] << 8 | udp_rx_buf[1];
+  uint16_t id_rcv = udp_rx_buf[2] << 8 | udp_rx_buf[3];
+  uint16_t add_rcv = udp_rx_buf[4] << 8 | udp_rx_buf[5];
+  if(port_rec == port && add_rcv == address && id_rcv == id) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Sets the T1S client for the Modbus communication.
+ *
+ * This function assigns a 10BASE-T1S UDP client to be used for Modbus communication.
+ *
+ * @param client A reference to an Arduino_10BASE_T1S_UDP object that represents the T1S client.
+ */
+void ModbusT1SClientClass::setT1SClient(Arduino_10BASE_T1S_UDP & client)
+{
+  _client = &client;
+}
+
+/**
+ * Sets the T1S port for the Modbus communication.
+ *
+ * This function sets the port number to be used for the T1S communication.
+ *
+ * @param port The port number to use for T1S communication.
+ */
+void ModbusT1SClientClass::setT1SPort(int port)
+{
+  udp_port = port;
+}
+
+/**
+ * Polls the Modbus client for incoming data.
+ *
+ * This function polls the Modbus client for incoming data.
+ */
+void ModbusT1SClientClass::update()
+{
+  tc6_inst->service();
+
+  static unsigned long prev_beacon_check = 0;
+  static unsigned long prev_udp_packet_sent = 0;
+
+  auto const now = millis();
+
+  if ((now - prev_beacon_check) > 1000)
+  {
+    prev_beacon_check = now;
+    tc6_inst->getPlcaStatus(callback);
+  }
+}
+
+/**
+ * Sets the callback function to be used by the ModbusT1SClient.
+ *
+ * This function sets the callback function to be used by the ModbusT1SClient.
+ *
+ * @param cb The callback function to use.
+ */
+void ModbusT1SClientClass::setCallback(callback_f cb) {
+  if(cb != nullptr) {
+    callback = cb;
+  }
+}
+
+/**
+ * Default callback function for PLCA status check.
+ *
+ * This function is the default callback function for PLCA status check.
+ *
+ * @param success The success status of the PLCA status check.
+ * @param plcaStatus The PLCA status.
+ */
+static void default_OnPlcaStatus(bool success, bool plcaStatus)
+{
+  if (!success)
+  {
+    return;
+  }
+
+  if (!plcaStatus) {
+    tc6_inst->enablePlca();
+  }
+}
+
+/**
+ * Sets the gateway IP address for the Modbus client.
+ *
+ * This function sets the gateway IP address for the Modbus client.
+ *
+ * @param gateway The gateway IP address.
+ */
+void ModbusT1SClientClass::setGateway(IPAddress gateway) {
+  _gateway = gateway;
+}
+
+/**
+ * Enables Power Over Ethernet (POE).
+ *
+ * This function enables Power Over Ethernet (POE) on the T1S client.
+ */
+void ModbusT1SClientClass::enablePOE() {
+  tc6_inst->digitalWrite(TC6::DIO::A0, true);
+  tc6_inst->digitalWrite(TC6::DIO::A1, true);
+}
+
+/**
+ * Disables Power Over Ethernet (POE).
+ *
+ * This function disables Power Over Ethernet (POE) on the T1S client.
+ */
+void ModbusT1SClientClass::disablePOE() {
+  tc6_inst->digitalWrite(TC6::DIO::A0, false);
+  tc6_inst->digitalWrite(TC6::DIO::A1, true);
 }
 
 long ModbusT1SClientClass::receive(int id, int address, Arduino_10BASE_T1S_UDP * client, int functionCode) {
@@ -417,6 +537,7 @@ int ModbusT1SClientClass::send(int id, int address, uint16_t value, Arduino_10BA
   return 1;
 }
 
+
 void ModbusT1SClientClass::write(uint8_t * buf, int len, Arduino_10BASE_T1S_UDP * client)
 {
   client->beginPacket(_server_ip, _server_port);
@@ -434,71 +555,5 @@ int ModbusT1SClientClass::read(Arduino_10BASE_T1S_UDP * client)
   }
   return 0;
 }
-
-bool ModbusT1SClientClass::checkPacket(int port, uint16_t id, uint16_t address)
-{
-  int port_rec = udp_rx_buf[0] << 8 | udp_rx_buf[1];
-  uint16_t id_rcv = udp_rx_buf[2] << 8 | udp_rx_buf[3];
-  uint16_t add_rcv = udp_rx_buf[4] << 8 | udp_rx_buf[5];
-  if(port_rec == port && add_rcv == address && id_rcv == id) {
-    return true;
-  }
-  return false;
-}
-
-void ModbusT1SClientClass::setT1SClient(Arduino_10BASE_T1S_UDP & client)
-{
-  _client = &client;
-}
-
-void ModbusT1SClientClass::setT1SPort(int port)
-{
-  udp_port = port;
-}
-
-void ModbusT1SClientClass::update()
-{
-  tc6_inst->service();
-
-  static unsigned long prev_beacon_check = 0;
-  static unsigned long prev_udp_packet_sent = 0;
-
-  auto const now = millis();
-
-  if ((now - prev_beacon_check) > 1000)
-  {
-    prev_beacon_check = now;
-    //tc6_inst->getPlcaStatus(callback);
-  }
-}
-
-void ModbusT1SClientClass::setCallback(callback_f cb) {
-  if(cb != nullptr) {
-    callback = cb;
-  }
-}
-
-static void default_OnPlcaStatus(bool success, bool plcaStatus)
-{
-  if (!success)
-  {
-    return;
-  }
-
-  if (!plcaStatus) {
-    tc6_inst->enablePlca();
-  }
-}
-
-void ModbusT1SClientClass::enablePOE() {
-  tc6_inst->digitalWrite(TC6::DIO::A0, true);
-  tc6_inst->digitalWrite(TC6::DIO::A1, true);
-}
-
-void ModbusT1SClientClass::disablePOE() {
-  tc6_inst->digitalWrite(TC6::DIO::A0, false);
-  tc6_inst->digitalWrite(TC6::DIO::A1, true);
-}
-
 ModbusT1SClientClass ModbusT1SClient;
 #endif

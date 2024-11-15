@@ -27,11 +27,11 @@ extern "C" {
 
 #include "ModbusT1SServer.h"
 #ifndef __AVR__
+
 /**
- * @class ModbusT1SServerClass
- * Class for Modbus T1S Server communication.
+ * Default constructor for ModbusT1SServerClass.
  *
- * This class provides functionalities to communicate with a Modbus T1S server.
+ * Initializes the Modbus server with RS485 communication.
  */
 ModbusT1SServerClass::ModbusT1SServerClass():
   callback(default_OnPlcaStatus)
@@ -58,6 +58,16 @@ ModbusT1SServerClass::~ModbusT1SServerClass()
 {
 }
 
+/**
+ * Start the Modbus T1S server with the specified parameters and RS485 communication.
+ *
+ * @param node_id id of the server
+ * @param baudrate Baud rate to use
+ * @param config serial config. to use defaults to SERIAL_8N1
+ * @param rs485 RS485 object to use
+ *
+ * Return 1 on success, 0 on failure
+ */
 int ModbusT1SServerClass::begin(int node_id, unsigned long baudrate, uint16_t config, RS485Class& rs485)
 {
   _node_id = node_id;
@@ -116,11 +126,18 @@ int ModbusT1SServerClass::begin(int node_id, unsigned long baudrate, uint16_t co
     return 0;
   }
 
-  ModbusRTUClient.setTimeout(2*1000); //RRR set timeout
+  ModbusRTUClient.setTimeout(2*1000);
 
   return 1;
 }
 
+/**
+ * Set the Modbus RTU client timeout.
+ *
+ * This function sets the Modbus RTU client timeout.
+ *
+ *  @param timeout The timeout value in milliseconds.
+ */
 void ModbusT1SServerClass::setTimeout(unsigned long timeout) {
   ModbusRTUClient.setTimeout(timeout);
 }
@@ -156,10 +173,9 @@ int ModbusT1SServerClass::coilRead(int address)
  * on the Modbus server using the provided UDP client.
  *
  * @param address The address of the coil to write to.
- * @param value The value to write to the coil (1 for ON, 0 for OFF).
  * @return int 1 if the write operation is successful, -1 if an error occurs.
  */
-int ModbusT1SServerClass::coilWrite(int address, uint8_t value)
+int ModbusT1SServerClass::coilWrite(int address)
 {
   return write(address, COILS);
 }
@@ -197,7 +213,6 @@ long ModbusT1SServerClass::inputRegisterRead(int address)
  * on the Modbus server using the provided UDP client.
  *
  * @param address The address of the holding register to write to.
- * @param value The value to write to the holding register.
  * @return int 1 if the write operation is successful, -1 if an error occurs.
  */
 long ModbusT1SServerClass::holdingRegisterRead(int address) {
@@ -211,7 +226,6 @@ long ModbusT1SServerClass::holdingRegisterRead(int address) {
  * on the Modbus server using the provided UDP client.
  *
  * @param address The address of the holding register to write to.
- * @param value The value to write to the holding register.
  * @return int 1 if the write operation is successful, -1 if an error occurs.
  */
 int ModbusT1SServerClass::holdingRegisterWrite(int address) {
@@ -243,6 +257,13 @@ int ModbusT1SServerClass::parsePacket() {
   return res;
 }
 
+/**
+ * Checks the PLCA status and Services the hardware and the protocol stack.
+ *
+ * This function checks the PLCA status and services the hardware and the
+ * protocol stack.
+ *
+ */
 void ModbusT1SServerClass::checkStatus()
 {
   tc6_inst->service();
@@ -259,10 +280,13 @@ void ModbusT1SServerClass::checkStatus()
   }
 }
 
+/**
+ * Manage the incoming T1S packets and make the appropriate Modbus request.
+ *
+ * This function manages the incoming T1S packets and makes the appropriate Modbus request.
+ */
 void ModbusT1SServerClass::update() {
-  /* Services the hardware and the protocol stack.
-     Must be called cyclic. The faster the better.
-  */
+
    checkStatus();
     switch (parsePacket())
     {
@@ -295,6 +319,16 @@ void ModbusT1SServerClass::update() {
    }
 }
 
+/**
+ * Reads a value from the T1S client, sends it to the Modbus server and sends the response back to the client.
+ *
+ * This function reads a value from the T1S client, sends it to the Modbus server and sends the response back to the client.
+ *
+ * @param address The address of the value to read.
+ * @param functionCode The function code to use for the Modbus request.
+ *
+ * @return long The value read from the Modbus server.
+ */
 long ModbusT1SServerClass::read(int address, int functionCode) {
   long res = -1;
   if(_server == nullptr) {
@@ -330,6 +364,16 @@ long ModbusT1SServerClass::read(int address, int functionCode) {
   return res;
 }
 
+/**
+ * reads a value from the T1S client and sends it to the Modbus server.
+ *
+ * This function reads a value from the T1S client and sends it to the Modbus server.
+ *
+ * @param address The address of the value to read.
+ * @param functionCode The function code to use for the Modbus request.
+ *
+ * @return long The value read from the Modbus server.
+ */
 long ModbusT1SServerClass::write(int address,  int functionCode) {
   long res = -1;
   if(_server == nullptr) {
@@ -359,7 +403,6 @@ long ModbusT1SServerClass::write(int address,  int functionCode) {
   return res;
 }
 
-
 /**
  * Sets the Arduino_10BASE_T1S_UDP server for communication.
  *
@@ -371,20 +414,49 @@ void ModbusT1SServerClass::setT1SServer(Arduino_10BASE_T1S_UDP & server) {
   _server = &server;
 }
 
-
+/**
+ * Sets the port to use for communication.
+ *
+ * This function sets the port to use for communication.
+ *
+ * @param port The port to use.
+ */
 void ModbusT1SServerClass::setT1SPort(int port) {
   udp_port = port;
 }
+
+/**
+ * Sets the baud rate to use for communication.
+ *
+ * This function sets the baud rate to use for communication.
+ *
+ * @param baudrate The baud rate to use.
+ */
 void ModbusT1SServerClass::setBaudrate(int baudrate) {
   _baudrate = baudrate;
 }
 
+/**
+ * Sets the callback function to use for PLCA status check.
+ *
+ * This function sets the callback function to use for PLCA status check.
+ *
+ * @param cb The callback function to use.
+ */
 void ModbusT1SServerClass::setCallback(callback_f cb) {
   if(cb != nullptr) {
     callback = cb;
   }
 }
 
+/**
+ * Default callback function for PLCA status check.
+ *
+ * This function is the default callback function for PLCA status check.
+ *
+ * @param success The success status of the PLCA status check.
+ * @param plcaStatus The PLCA status.
+ */
 static void default_OnPlcaStatus(bool success, bool plcaStatus)
 {
   if (!success)
@@ -397,16 +469,33 @@ static void default_OnPlcaStatus(bool success, bool plcaStatus)
   }
 }
 
+/**
+ * Enables Power Over Ethernet (POE).
+ *
+ * This function enables Power Over Ethernet (POE) setting the device as power source.
+ */
 void ModbusT1SServerClass::enablePOE() {
   tc6_inst->digitalWrite(TC6::DIO::A0, true);
   tc6_inst->digitalWrite(TC6::DIO::A1, true);
 }
 
+/**
+ * Disables Power Over Ethernet (POE).
+ *
+ * This function disables Power Over Ethernet (POE) and set the USB as power source.
+ */
 void ModbusT1SServerClass::disablePOE() {
   tc6_inst->digitalWrite(TC6::DIO::A0, false);
   tc6_inst->digitalWrite(TC6::DIO::A1, true);
 }
 
+/**
+ * Sets the gateway IP address.
+ *
+ * This function sets the gateway IP address.
+ *
+ * @param ip The gateway IP address.
+ */
 void ModbusT1SServerClass::setGatwayIP(IPAddress ip) {
   _gateway = ip;
 }

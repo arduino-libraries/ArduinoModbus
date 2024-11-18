@@ -46,6 +46,21 @@ configureInputRegisters	KEYWORD2
 discreteInputWrite	KEYWORD2
 inputRegisterWrite	KEYWORD2
 
+setServerIp	KEYWORD2
+setServerPort	KEYWORD2
+setModbusId KEYWORD2
+setT1SServer	KEYWORD2
+setT1SClient	KEYWORD2
+setGateway	KEYWORD2
+setRxTimeout	KEYWORD2
+setT1SPort	KEYWORD2
+update	KEYWORD2
+setCallback	KEYWORD2
+enablePOE	KEYWORD2
+disablePOE	KEYWORD2
+checkStatus	KEYWORD2
+parsePacket	KEYWORD2
+
 #######################################
 # Constants (LITERAL1)
 #######################################

@@ -31,6 +31,7 @@ jobs:
         # Install the ArduinoModbus library from the local path
         - source-path: ./
         - name: ArduinoRS485
+        - name: Arduino_10BASE_T1S
       UNIVERSAL_SKETCH_PATHS: |
         - examples/RTU
 
@@ -42,24 +43,38 @@ jobs:
           - fqbn: arduino:megaavr:uno2018:mode=off
             ethernet: true
             nina: true
+            spe: false
             artifact-name-suffix: arduino-megaavr-uno2018
           - fqbn: arduino:samd:mkrwifi1010
             ethernet: true
             nina: true
+            spe: false
             artifact-name-suffix: arduino-samd-mkrwifi1010
           - fqbn: arduino:mbed_nano:nano33ble
             ethernet: false
             nina: false
+            spe: false
             artifact-name-suffix: arduino-mbed_nano-nano33ble
           - fqbn: arduino:mbed_portenta:envie_m7
             ethernet: false
             nina: false
+            spe: false
             artifact-name-suffix: arduino-mbed_portenta-envie_m7
           - fqbn: arduino:mbed_opta:opta
             ethernet: true
             nina: false
+            spe: false
             artifact-name-suffix: arduino-mbed_opta-opta
-
+          - fqbn: arduino:renesas_uno:unor4wifi
+            ethernet: false
+            nina: false
+            spe: true
+            artifact-name-suffix: arduino-renesas_uno-unor4wifi
+          - fqbn: arduino:renesas_uno:minima
+            ethernet: false
+            nina: false
+            spe: true
+            artifact-name-suffix: arduino-renesas_uno-minima
         # Make board type-specific customizations to the matrix jobs
         include:
           - board:
@@ -89,6 +104,21 @@ jobs:
           - board:
               nina: false
             nina-libraries: ""
+            nina-sketch-paths: ""
+          - board:
+              # Boards with T1S shield
+              spe: true
+            # Install these libraries in addition to the ones defined by env.UNIVERSAL_LIBRARIES
+            spe-libraries: ""
+            # Compile these sketches in addition to the ones defined by env.UNIVERSAL_SKETCH_PATHS
+            nina-sketch-paths: |
+              - examples/T1S
+          - board:
+              # Boards with T1S shield
+              spe: false
+            # Install these libraries in addition to the ones defined by env.UNIVERSAL_LIBRARIES
+            spe-libraries: ""
+            # Compile these sketches in addition to the ones defined by env.UNIVERSAL_SKETCH_PATHS
             nina-sketch-paths: ""
 
     steps:

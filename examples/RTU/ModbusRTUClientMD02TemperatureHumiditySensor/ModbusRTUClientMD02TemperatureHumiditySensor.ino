@@ -56,7 +56,7 @@ void loop()
   if (ModbusRTUClient.available())
   {
     int16_t const temperature_raw = ModbusRTUClient.read();
-    float const temperature_deg = temperature_raw / 100.f;
+    float const temperature_deg = temperature_raw / 10.f;
     Serial.println(temperature_deg);
   }
 
@@ -68,7 +68,7 @@ void loop()
   if (ModbusRTUClient.available())
   {
     int16_t const humidity_raw = ModbusRTUClient.read();
-    float const humidity_per_cent = humidity_raw / 100.f;
+    float const humidity_per_cent = humidity_raw / 10.f;
     Serial.println(humidity_per_cent);
   }
 

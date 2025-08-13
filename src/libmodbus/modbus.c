@@ -1,6 +1,6 @@
 /*
- * Copyright Â© 2001-2011 StÃ©phane Raimbault <stephane.raimbault@gmail.com>
- * Copyright Â© 2018 Arduino SA. All rights reserved.
+ * Copyright © 2001-2011 Stéphane Raimbault <stephane.raimbault@gmail.com>
+ * Copyright © 2018 Arduino SA. All rights reserved.
  *
  * SPDX-License-Identifier: LGPL-2.1+
  *
@@ -8,19 +8,32 @@
  * http://libmodbus.org/
  */
 
+#ifdef ARDUINO_SAM_DUE
+#include <Arduino.h> //moust be include here to compile
+#endif
+
+
+#ifndef _MSC_VER
+#ifndef ARDUINO_SAM_DUE
+//compile with DUE without those includes
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdarg.h>
-#include <errno.h>
 #include <limits.h>
 #include <time.h>
-#ifndef _MSC_VER
+//make due not compile if included
 #include <unistd.h>
+#endif
+#include <errno.h>
 #endif
 #ifdef ARDUINO
 #include <stdbool.h>
+
+#ifndef ARDUINO_SAM_DUE
 #include <Arduino.h>
+#endif
+
 
 #ifndef DEBUG
 #define printf(...) {}

@@ -10,6 +10,12 @@
 
 #include "modbus.h"
 
+#if defined(ESP32) || defined(ESP8266)
+#define RS485_SER_CONF_TYPE uint32_t
+#else
+#define RS485_SER_CONF_TYPE uint16_t
+#endif
+
 MODBUS_BEGIN_DECLS
 
 /* Modbus_Application_Protocol_V1_1b.pdf Chapter 4 Section 1 Page 5
@@ -19,7 +25,7 @@ MODBUS_BEGIN_DECLS
 
 #ifdef ARDUINO
 class RS485Class;
-MODBUS_API modbus_t* modbus_new_rtu(RS485Class *rs485, unsigned long baud, uint16_t config);
+MODBUS_API modbus_t* modbus_new_rtu(RS485Class *rs485, unsigned long baud, RS485_SER_CONF_TYPE config);
 #else
 MODBUS_API modbus_t* modbus_new_rtu(const char *device, int baud, char parity,
                                     int data_bit, int stop_bit);

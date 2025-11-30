@@ -75,4 +75,9 @@ int ModbusRTUServerClass::poll()
   return 0;
 }
 
+int ModbusRTUServerClass::flush()
+{
+  return modbus_flush(_mb);
+}
+
 ModbusRTUServerClass ModbusRTUServer;

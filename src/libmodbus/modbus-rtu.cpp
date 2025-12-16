@@ -654,7 +654,11 @@ static int _modbus_rtu_connect(modbus_t *ctx)
         return -1;
     }
 #elif defined(ARDUINO)
+#ifdef ARDUINO_ARCH_SAM
+    ctx_rtu->rs485->begin(ctx_rtu->baud, static_cast<UARTClass::UARTModes>(ctx_rtu->config));
+#else
     ctx_rtu->rs485->begin(ctx_rtu->baud, ctx_rtu->config);
+#endif
     ctx_rtu->rs485->receive();
 #else
     /* The O_NOCTTY flag tells UNIX that this program doesn't want

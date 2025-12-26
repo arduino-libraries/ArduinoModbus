@@ -10,7 +10,7 @@
 
 #ifndef _MSC_VER
 # include <stdint.h>
-#if defined(ARDUINO) && defined(__AVR__)
+#if defined(ARDUINO) && (defined(__AVR__) || defined(ARDUINO_ARCH_RENESAS))
 #define ssize_t unsigned long
 
 #define fd_set void*

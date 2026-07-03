@@ -723,7 +723,7 @@ static int response_io_status(uint8_t *tab_io_status,
 static int response_exception(modbus_t *ctx, sft_t *sft,
                               int exception_code, uint8_t *rsp,
                               unsigned int to_flush,
-                              const char* template, ...)
+                              const char* format, ...)
 {
     int rsp_length;
 
@@ -731,8 +731,8 @@ static int response_exception(modbus_t *ctx, sft_t *sft,
     if (ctx->debug) {
         va_list ap;
 
-        va_start(ap, template);
-        vfprintf(stderr, template, ap);
+        va_start(ap, format);
+        vfprintf(stderr, format, ap);
         va_end(ap);
     }
 
@@ -992,10 +992,10 @@ int modbus_reply(modbus_t *ctx, const uint8_t *req,
                 address);
         } else {
             uint16_t data = mb_mapping->tab_registers[mapping_address];
-            uint16_t and = (req[offset + 3] << 8) + req[offset + 4];
-            uint16_t or = (req[offset + 5] << 8) + req[offset + 6];
+            uint16_t _and = (req[offset + 3] << 8) + req[offset + 4];
+            uint16_t _or = (req[offset + 5] << 8) + req[offset + 6];
 
-            data = (data & and) | (or & (~and));
+            data = (data & _and) | (_or & (~_and));
             mb_mapping->tab_registers[mapping_address] = data;
             memcpy(rsp, req, req_length);
             rsp_length = req_length;
@@ -1904,9 +1904,9 @@ void modbus_mapping_free(modbus_mapping_t *mb_mapping)
  */
 size_t strlcpy(char *dest, const char *src, size_t dest_size)
 {
-    register char *d = dest;
-    register const char *s = src;
-    register size_t n = dest_size;
+    char *d = dest;
+    const char *s = src;
+    size_t n = dest_size;
 
     /* Copy as many bytes as will fit */
     if (n != 0 && --n != 0) {

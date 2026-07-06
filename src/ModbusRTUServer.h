@@ -17,8 +17,14 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+
 #ifndef _MODBUS_RTU_SERVER_H_INCLUDED
 #define _MODBUS_RTU_SERVER_H_INCLUDED
+
+
+#ifndef RS485_SER_CONF_TYPE
+#define RS485_SER_CONF_TYPE uint16_t
+#endif
 
 #include "ModbusServer.h"
 #include <ArduinoRS485.h>
@@ -38,8 +44,8 @@ public:
    *
    * Return 1 on success, 0 on failure
    */
-  int begin(int id, unsigned long baudrate, uint16_t config = SERIAL_8N1);
-  int begin(RS485Class& rs485, int id, unsigned long baudrate, uint16_t config = SERIAL_8N1);
+  int begin(int id, unsigned long baudrate, RS485_SER_CONF_TYPE config = SERIAL_8N1);
+  int begin(RS485Class& rs485, int id, unsigned long baudrate, RS485_SER_CONF_TYPE config = SERIAL_8N1);
 
   /**
    * Poll interface for requests

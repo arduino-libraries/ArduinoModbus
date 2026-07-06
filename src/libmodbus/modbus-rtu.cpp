@@ -654,7 +654,11 @@ static int _modbus_rtu_connect(modbus_t *ctx)
         return -1;
     }
 #elif defined(ARDUINO)
+#if defined(ESP32) || defined(ESP8266)
+    ctx_rtu->rs485->begin(ctx_rtu->baud, static_cast<SerialConfig>(ctx_rtu->config));
+#else
     ctx_rtu->rs485->begin(ctx_rtu->baud, ctx_rtu->config);
+#endif
     ctx_rtu->rs485->receive();
 #else
     /* The O_NOCTTY flag tells UNIX that this program doesn't want
@@ -1330,7 +1334,7 @@ const modbus_backend_t _modbus_rtu_backend = {
 };
 
 #ifdef ARDUINO
-modbus_t* modbus_new_rtu(RS485Class *rs485, unsigned long baud, uint16_t config)
+modbus_t* modbus_new_rtu(RS485Class *rs485, unsigned long baud, RS485_SER_CONF_TYPE config)
 #else
 modbus_t* modbus_new_rtu(const char *device,
                          int baud, char parity, int data_bit,

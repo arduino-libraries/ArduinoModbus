@@ -1395,7 +1395,7 @@ int modbus_write_bits(modbus_t *ctx, int addr, int nb, const uint8_t *src)
     }
 
     rc = send_msg(ctx, req, req_length);
-    if (rc > 0) {
+    if (rc > 0 && ctx->slave != 0) {
         uint8_t rsp[MAX_MESSAGE_LENGTH];
 
         rc = _modbus_receive_msg(ctx, rsp, MSG_CONFIRMATION);
@@ -1445,7 +1445,7 @@ int modbus_write_registers(modbus_t *ctx, int addr, int nb, const uint16_t *src)
     }
 
     rc = send_msg(ctx, req, req_length);
-    if (rc > 0) {
+    if (rc > 0 && ctx->slave != 0) {
         uint8_t rsp[MAX_MESSAGE_LENGTH];
 
         rc = _modbus_receive_msg(ctx, rsp, MSG_CONFIRMATION);

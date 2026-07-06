@@ -46,6 +46,11 @@ public:
    */
   virtual int poll();
 
+  /**
+   * Flush modbus
+   */
+  virtual int flush();
+
 private:
   RS485Class* _rs485 = &RS485;
 };

@@ -25,6 +25,7 @@
 #ifndef DEBUG
 #define printf(...) {}
 #define fprintf(...) {}
+#define vfprintf(...) {}
 #endif
 #endif
 

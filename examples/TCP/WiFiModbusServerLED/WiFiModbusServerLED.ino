@@ -12,8 +12,13 @@
 */
 
 #include <SPI.h>
+#if defined(ARDUINO_ARCH_ZEPHYR)
+#include <WiFi.h>
+#include <ZephyrServer.h>
+#else
 #include <WiFiNINA.h> // for MKR WiFi 1010
 // #include <WiFi101.h> // for MKR1000
+#endif
 
 #include <ArduinoRS485.h> // ArduinoModbus depends on the ArduinoRS485 library
 #include <ArduinoModbus.h>
@@ -28,7 +33,11 @@ const int ledPin = LED_BUILTIN;
 
 int status = WL_IDLE_STATUS;
 
+#if defined(ARDUINO_ARCH_ZEPHYR)
+ZephyrServer wifiServer(502);
+#else
 WiFiServer wifiServer(502);
+#endif
 
 ModbusTCPServer modbusTCPServer;
 
@@ -74,8 +83,12 @@ void setup() {
 
 void loop() {
   // listen for incoming clients
+#if defined(ARDUINO_ARCH_ZEPHYR)
+  WiFiClient client = wifiServer.accept();
+#else
   WiFiClient client = wifiServer.available();
-  
+#endif
+
   if (client) {
     // a new client connected
     Serial.println("new client");

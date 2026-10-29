@@ -12,8 +12,12 @@
 */
 
 #include <SPI.h>
+#if defined(ARDUINO_ARCH_ZEPHYR)
+#include <WiFi.h>
+#else
 #include <WiFiNINA.h> // for MKR WiFi 1010
 // #include <WiFi101.h> // for MKR1000
+#endif
 
 #include <ArduinoRS485.h> // ArduinoModbus depends on the ArduinoRS485 library
 #include <ArduinoModbus.h>

@@ -20,6 +20,7 @@ struct timeval {
     uint32_t tv_usec;
 };
 #else
+# include <sys/select.h>
 # include <sys/time.h>
 #endif
 #else
